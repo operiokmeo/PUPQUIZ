@@ -102,9 +102,10 @@ class EmailController extends Controller
         $user = User::where("email", $request->email)->first();
 
         if (!$user) {
-            return back()->withErrors([
-                'email' => 'Email not found',
-            ]);
+            return response()->json([
+                'msg' => 'Email not found',
+                'error' => 'Email not found'
+            ], 404);
         }
         if ($lOtp) {
             $lOtp->delete();
@@ -112,9 +113,10 @@ class EmailController extends Controller
 
 
         if (!Hash::check($request->password, $user->password)) {
-            return back()->withErrors([
-                'password' => 'Invalid password',
-            ]);
+            return response()->json([
+                'msg' => 'Invalid password',
+                'error' => 'Invalid password'
+            ], 401);
         }
         try {
             $otp = rand(100000, 999999);
