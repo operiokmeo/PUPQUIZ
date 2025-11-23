@@ -37,3 +37,5 @@ If you want to use MySQL later:
 ✅ login_otp table created
 ✅ Application should now work without MySQL
 
+
+

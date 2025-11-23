@@ -27,7 +27,8 @@ export default function LobbyCategory() {
   const [isFirstSubject, setIsFirstSubject] = useState(false)
   const [currentTime, setCurrentTime] = useState<Date>(new Date())
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000 * 30);
+    // Update more frequently to ensure consistent status checks
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
@@ -157,19 +158,21 @@ export default function LobbyCategory() {
 
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 gap-x-10 mt-5'>
               {lobby.subjects.map(subject => (
-                <div className='bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group hover:scale-[1.02]'>
+                <div key={subject.id} className='bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group hover:scale-[1.02]'>
                   <div className='bg-gradient-to-r from-red-500 to-red-600 p-4'>
                     <p className='text-white font-medium text-lg'>{subject.subject_name}</p>
                   </div>
 
                   <div className='p-4  flex gap-x-2'>
                     {(() => {
+                      // Use subject start_date as primary source (consistent with backend logic)
                       const startDate: string | null = subject.start_date ?? subject.startDate ?? null;
                       let parsedStart: Date | null = null;
                       
                       if (startDate) {
                         // Parse the date string - handle both ISO format and 'Y-m-d H:i:s' format
                         // If it's in 'Y-m-d H:i:s' format, replace space with 'T' to make it parseable
+                        // Don't add 'Z' to keep it as local time (consistent with backend timezone handling)
                         const normalizedDate = startDate.includes('T') ? startDate : startDate.replace(' ', 'T');
                         parsedStart = new Date(normalizedDate);
                         
@@ -179,7 +182,9 @@ export default function LobbyCategory() {
                         }
                       }
                       
-                      const canProceed = !parsedStart || parsedStart.getTime() <= currentTime.getTime();
+                      // Use consistent time comparison - allow proceed if no start date or if current time >= start time
+                      // Add a small buffer (1 second) to account for any timing discrepancies
+                      const canProceed = !parsedStart || (parsedStart.getTime() - 1000) <= currentTime.getTime();
                       return (
                         <button
                           type="button"
@@ -209,9 +214,17 @@ export default function LobbyCategory() {
                   </div>
                   <div className='px-4 pb-4 text-xs text-gray-500 space-y-1'>
                     <p><span className='font-semibold text-gray-700'>Start:</span> {formatDateLabel(subject.start_date ?? subject.startDate)}</p>
-                    {subject.start_date && new Date(subject.start_date) > currentTime && (
-                      <p className='text-amber-600 font-medium'>Participants can join once the scheduled time arrives.</p>
-                    )}
+                    {(() => {
+                      const startDate: string | null = subject.start_date ?? subject.startDate ?? null;
+                      if (startDate) {
+                        const normalizedDate = startDate.includes('T') ? startDate : startDate.replace(' ', 'T');
+                        const parsedStart = new Date(normalizedDate);
+                        if (!isNaN(parsedStart.getTime()) && parsedStart.getTime() > currentTime.getTime()) {
+                          return <p className='text-amber-600 font-medium'>Participants can join once the scheduled time arrives.</p>;
+                        }
+                      }
+                      return null;
+                    })()}
                   </div>
                 </div>
               ))}

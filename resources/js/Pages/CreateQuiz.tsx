@@ -392,20 +392,35 @@ export default function CreateQuizPage() {
     const handleSave = (): void => {
         const quizData: any = {
             title: quizTitle,
-            questions: questions.map(q => ({
-                type: q.type,
-                questionText: q.questionText,
-                image: q.image,
-                timeLimit: q.timeLimit ? parseInt(q.timeLimit) : null,
-                points: q.points ? parseInt(q.points) : null,
-                difficulty: q.difficulty, // Include difficulty in the saved data
-                options: q.type === 'multiple-choice' ? q.options.map(opt => ({
-                    text: opt.text,
-                    isCorrect: opt.isCorrect,
-                })) : null,
-                trueFalseAnswer: q.type === 'true-false' ? (q.trueFalseAnswer === true || q.trueFalseAnswer === false ? q.trueFalseAnswer : null) : null,
-                shortAnswer: q.type === 'short-answer' ? (q.shortAnswer || null) : null,
-            }))
+            questions: questions.map(q => {
+                // Build base question data
+                const questionData: any = {
+                    type: q.type,
+                    questionText: q.questionText,
+                    image: q.image,
+                    timeLimit: q.timeLimit ? parseInt(q.timeLimit) : null,
+                    points: q.points ? parseInt(q.points) : null,
+                    difficulty: q.difficulty, // Include difficulty in the saved data
+                    options: q.type === 'multiple-choice' ? q.options.map(opt => ({
+                        text: opt.text,
+                        isCorrect: opt.isCorrect,
+                    })) : null,
+                    trueFalseAnswer: q.type === 'true-false' ? (q.trueFalseAnswer === true || q.trueFalseAnswer === false ? q.trueFalseAnswer : null) : null,
+                };
+                
+                // Only include shortAnswer for short-answer type questions
+                // Backend validation: nullable|required_if:questions.*.type,short-answer|string|min:1
+                // This means: if type is short-answer, it's required and must be a non-empty string
+                // For other types, we must NOT include it at all (not even as null or empty string)
+                if (q.type === 'short-answer') {
+                    // Ensure it's always a string with at least 1 character (backend validation requirement)
+                    const trimmedAnswer = (q.shortAnswer && typeof q.shortAnswer === 'string') ? q.shortAnswer.trim() : '';
+                    questionData.shortAnswer = trimmedAnswer; // Backend will validate min:1
+                }
+                // For non-short-answer questions, shortAnswer is NOT included in the payload
+                
+                return questionData;
+            })
         };
 
         // Include subject_id if available (for Quiz Logs tracking)
@@ -426,7 +441,7 @@ export default function CreateQuizPage() {
                 });
                 setQuizTitle('');
                 setQuestions([]);
-                setPreviewContent([]);
+                // previewContent is a useMemo, not state, so no setter needed
                 setShowPreview(false);
             },
             onError: (errors) => {

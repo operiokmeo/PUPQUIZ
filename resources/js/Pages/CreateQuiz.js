@@ -88,19 +88,30 @@ export default function CreateQuizPage() {
         // and for nested JSON if configured, but explicit mapping is safer for nested objects.
         const quizData = {
             title: quizTitle,
-            questions: questions.map(q => ({
-                type: q.type,
-                questionText: q.questionText, // Will be mapped to 'question_text' in controller
-                image: q.image, // Will be mapped to 'image_path' in controller
-                timeLimit: q.timeLimit ? parseInt(q.timeLimit) : null, // Will be mapped to 'time_limit'
-                points: q.points ? parseInt(q.points) : null,
-                options: q.type === 'multiple-choice' ? q.options.map(opt => ({
-                    text: opt.text, // Will be mapped to 'option_text'
-                    isCorrect: opt.isCorrect, // Will be mapped to 'is_correct'
-                })) : null,
-                trueFalseAnswer: q.type === 'true-false' ? (q.trueFalseAnswer === true || q.trueFalseAnswer === false ? q.trueFalseAnswer : null) : null, // Will be mapped to 'true_false_answer'
-                shortAnswer: q.type === 'short-answer' ? (q.shortAnswer || null) : null, // Will be mapped to 'short_answer'
-            }))
+            questions: questions.map(q => {
+                // Build base question data
+                const questionData = {
+                    type: q.type,
+                    questionText: q.questionText, // Will be mapped to 'question_text' in controller
+                    image: q.image, // Will be mapped to 'image_path' in controller
+                    timeLimit: q.timeLimit ? parseInt(q.timeLimit) : null, // Will be mapped to 'time_limit'
+                    points: q.points ? parseInt(q.points) : null,
+                    options: q.type === 'multiple-choice' ? q.options.map(opt => ({
+                        text: opt.text, // Will be mapped to 'option_text'
+                        isCorrect: opt.isCorrect, // Will be mapped to 'is_correct'
+                    })) : null,
+                    trueFalseAnswer: q.type === 'true-false' ? (q.trueFalseAnswer === true || q.trueFalseAnswer === false ? q.trueFalseAnswer : null) : null, // Will be mapped to 'true_false_answer'
+                };
+                
+                // Only include shortAnswer for short-answer type questions
+                // For other question types, don't include it at all to avoid validation errors
+                if (q.type === 'short-answer') {
+                    const trimmedAnswer = (q.shortAnswer && typeof q.shortAnswer === 'string') ? q.shortAnswer.trim() : '';
+                    questionData.shortAnswer = trimmedAnswer; // Backend will validate min:1
+                }
+                
+                return questionData;
+            })
         };
         router.post('/quizzes', quizData, {
             onSuccess: () => {

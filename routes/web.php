@@ -90,10 +90,24 @@ Route::get('/explore', function (Request $request) {
 
 Route::get('/session-history', function () {
     try {
-        $logs = SessionLogs::with('user')
-            ->where("user_id", Auth::id())
-            ->orderBy('created_at', 'desc')
-            ->get()
+        $user = Auth::user();
+        
+        // Session history should only show logs of students (role 2)
+        // If the current user is a student, show only their own logs
+        // If the current user is an organizer/teacher, show all student logs
+        $query = SessionLogs::with('user')
+            ->whereHas('user', function ($q) use ($user) {
+                if ($user->role === 2) {
+                    // Students see only their own sessions
+                    $q->where('id', $user->id)->where('role', 2);
+                } else {
+                    // Organizers/Teachers see all student sessions
+                    $q->where('role', 2);
+                }
+            })
+            ->orderBy('created_at', 'desc');
+        
+        $logs = $query->get()
             ->map(function ($log) {
                 return [
                     'id' => $log->id,
@@ -808,7 +822,7 @@ Route::get('/questionnaire/{id}/{team_id}/{subject_id}', function ($id, $team_id
 
 Route::get('/lobbies', [LobbyController::class, 'getLobby'])->name('lobbies');
 Route::get('/lobby-start/{id}', [LobbyController::class, 'start'])->name('lobby-start');
-Route::get('/lobby-revealOptions/{id}/{subject_id}', [LobbyController::class, 'revealOptions'])->name('lobby-revealOptions');
+Route::get('/lobby-revealOptions/{id}/{subject_id}', [LobbyController::class, 'revealOptions'])->middleware(['auth'])->name('lobby-revealOptions');
 Route::get('/lobby-startTimer/{id}/{subject_id}', [LobbyController::class, 'startTimer'])->name('lobby-startTimer');
 Route::get('/showOverAllLeaderBoard/{id}/{subject_id}', [LobbyController::class, 'showOverAllLeaderBoard'])->name('showOverAllLeaderBoard');
 Route::get('/lobby-gameLevel/{id}/{level}/{subject_id}', [LobbyController::class, 'gameLevel'])->name('lobby-gameLevel');

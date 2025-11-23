@@ -635,7 +635,7 @@ export default function SubjectQuestionForm() {
             return
         }
         updatedBulk.forEach(question => {
-            const quizData = {
+            const quizData: any = {
                 title: quizTitle,
                 subject_id: subjectId as number, // or as string, depending on what it is
                 question: question.questionText,
@@ -653,11 +653,15 @@ export default function SubjectQuestionForm() {
                         ? question.trueFalseAnswer
                         : null)
                     : null,
-
-                shortAnswer: question.type === 'short-answer' ? (question.shortAnswer || null) : null,
                 quiz_title: quizTitle
-
             };
+            
+            // Only include shortAnswer for short-answer type questions
+            // Don't include it at all for other types to avoid validation errors
+            if (question.type === 'short-answer' && question.shortAnswer) {
+                quizData.shortAnswer = question.shortAnswer;
+            }
+            
             quizes_questions.push(quizData)
         });
 

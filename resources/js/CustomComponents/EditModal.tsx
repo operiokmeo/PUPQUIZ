@@ -183,8 +183,8 @@ export default function EditModal(props: Props) {
 
     return (
         <Dialog open={show} onOpenChange={() => setShow(!show)}>
-            <DialogContent className="sm:max-w-[425px] min-w-[900px] max-h-[960px]  overflow-auto">
-                <DialogHeader>
+            <DialogContent className="sm:max-w-[425px] min-w-[1000px] max-h-[90vh] overflow-hidden flex flex-col">
+                <DialogHeader className="flex-shrink-0">
                     <DialogTitle>Edit Question</DialogTitle>
                     <DialogDescription>
                         Make changes to question here. Click save when you&apos;re
@@ -192,35 +192,31 @@ export default function EditModal(props: Props) {
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="max-w-4xl w-full mx-auto bg-white">
-
-
-                    <div className="bg-gray-50 p-6 rounded-b-lg border">
+                <div className="flex-1 overflow-y-auto pr-2">
+                    <div className="max-w-4xl w-full mx-auto bg-white">
+                        <div className="bg-gray-50 p-4 rounded-b-lg border">
                         {/* Basic Information */}
 
 
                         {/* Question */}
-                        <div className="mb-6">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Question
                             </label>
                             <textarea
                                 value={formData.question}
                                 onChange={(e) => {
-                                    const value = e.target.value.replace(/\?/g, ''); // remove all “?”
+                                    const value = e.target.value.replace(/\?/g, ''); // remove all "?"
                                     handleInputChange('question', value)
-                                }
-
-
-                                }
-                                rows={3}
+                                }}
+                                rows={2}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="Enter your question here..."
                             />
                         </div>
 
                         {/* Settings Row */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Difficulty
@@ -251,14 +247,13 @@ export default function EditModal(props: Props) {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     <Clock className="inline w-4 h-4 mr-1" />
-                                    Time Limit (minutes)
+                                    Time Limit (seconds)
                                 </label>
                                 <input
                                     type="number"
                                     value={formData.timeLimit}
                                     onChange={(e) => handleInputChange('timeLimit', e.target.value)}
                                     min="1"
-                                    max="120"
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                                 />
                             </div>
@@ -266,21 +261,21 @@ export default function EditModal(props: Props) {
 
                         {/* Options Section */}
                         {formData.type === 'multiple-choice' && (
-                            <div className="mb-6">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-lg font-medium text-gray-900">Answer Options</h3>
+                            <div className="mb-4">
+                                <div className="flex justify-between items-center mb-2">
+                                    <h3 className="text-base font-medium text-gray-900">Answer Options</h3>
                                     <button
                                         onClick={addOption}
-                                        className="flex items-center px-3 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"
+                                        className="flex items-center px-2 py-1.5 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors text-sm"
                                     >
-                                        <Plus className="w-4 h-4 mr-1" />
+                                        <Plus className="w-3 h-3 mr-1" />
                                         Add Option
                                     </button>
                                 </div>
 
-                                <div className="space-y-3">
+                                <div className="space-y-2">
                                     {formData.options.map((option, index) => (
-                                        <div key={index} className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg bg-white">
+                                        <div key={index} className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg bg-white">
                                             <div className="flex items-center">
                                                 <input
                                                     type="radio"
@@ -289,7 +284,7 @@ export default function EditModal(props: Props) {
                                                     onChange={() => setCorrectAnswer(index)}
                                                     className="w-4 h-4 text-orange-600 focus:ring-orange-500"
                                                 />
-                                                <span className="ml-2 text-sm text-gray-600">Correct</span>
+                                                <span className="ml-1 text-xs text-gray-600">Correct</span>
                                             </div>
 
                                             <input
@@ -297,15 +292,15 @@ export default function EditModal(props: Props) {
                                                 value={option.text}
                                                 onChange={(e) => handleOptionChange(index, 'text', e.target.value)}
                                                 placeholder={`Option ${index + 1}`}
-                                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                                className="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                                             />
 
                                             {formData.options.length > 2 && (
                                                 <button
                                                     onClick={() => removeOption(index)}
-                                                    className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                                    className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
                                                 >
-                                                    <Trash2 className="w-4 h-4" />
+                                                    <Trash2 className="w-3.5 h-3.5" />
                                                 </button>
                                             )}
                                         </div>
@@ -316,16 +311,16 @@ export default function EditModal(props: Props) {
 
                         {/* Short Answer Section */}
                         {formData.type === 'short-answer' && (
-                            <div className="mb-6">
-                                <h3 className="text-lg font-medium text-gray-900 mb-4">Correct Answer</h3>
-                                <div className="bg-white p-4 border border-gray-200 rounded-lg">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <div className="mb-4">
+                                <h3 className="text-base font-medium text-gray-900 mb-2">Correct Answer</h3>
+                                <div className="bg-white p-3 border border-gray-200 rounded-lg">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Expected Answer
                                     </label>
                                     <textarea
                                         value={formData.shortAnswer || ''}
                                         onChange={(e) => handleInputChange('shortAnswer', e.target.value)}
-                                        rows={3}
+                                        rows={2}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                                         placeholder="Enter the correct answer for this question..."
                                     />
@@ -338,9 +333,9 @@ export default function EditModal(props: Props) {
 
                         {/* True/False Section */}
                         {formData.type === 'true-false' && (
-                            <div className="mb-6">
-                                <h3 className="text-lg font-medium text-gray-900 mb-4">Correct Answer</h3>
-                                <div className="bg-white p-4 border border-gray-200 rounded-lg">
+                            <div className="mb-4">
+                                <h3 className="text-base font-medium text-gray-900 mb-2">Correct Answer</h3>
+                                <div className="bg-white p-3 border border-gray-200 rounded-lg">
                                     <div className="flex gap-4">
                                         <label className="flex items-center">
                                             <input
@@ -368,38 +363,43 @@ export default function EditModal(props: Props) {
                                 </div>
                             </div>
                         )}
-                        {/* Save Button */}
-                        <div className="flex justify-end">
-                            <button
-                                onClick={handleSave}
-                                className="flex items-center px-6 py-3 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors font-medium"
-                            >
-                                <Save className="w-4 h-4 mr-2" />
-                                Save Question
-                            </button>
-                        </div>
+                        
+                        {/* Save Button and Preview in a row */}
+                        <div className="flex gap-4 items-start">
+                            {/* Save Button */}
+                            <div className="flex-1 flex justify-end">
+                                <button
+                                    onClick={handleSave}
+                                    className="flex items-center px-6 py-2.5 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors font-medium"
+                                >
+                                    <Save className="w-4 h-4 mr-2" />
+                                    Save Question
+                                </button>
+                            </div>
 
-                        {/* Preview */}
-                        {formData.type === 'multiple-choice' &&
-                            <div className="mt-8 p-4 bg-orange-50 rounded-lg">
-                                <h4 className="font-medium text-gray-900 mb-2">Preview:</h4>
-                                <div className="text-sm text-gray-600">
-                                    <p><strong>Q{formData.id}:</strong> {formData.question}</p>
-                                    <p><strong>Difficulty:</strong> {formData.difficulty} | <strong>Time:</strong> {formData.timeLimit} min | <strong>Points:</strong> {formData.points}</p>
-                                    {formData.options.length > 0 && (
-                                        <div className="mt-2">
-                                            <strong>Options:</strong>
-                                            <ul className="list-disc list-inside ml-4">
-                                                {formData.options.map((option, index) => (
-                                                    <li key={index} className={option.isCorrect ? 'text-orange-600 font-medium' : ''}>
-                                                        {option.text} {option.isCorrect && '✓'}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
+                            {/* Preview - Compact */}
+                            {formData.type === 'multiple-choice' && (
+                                <div className="flex-1 p-3 bg-orange-50 rounded-lg">
+                                    <h4 className="font-medium text-gray-900 mb-1 text-sm">Preview:</h4>
+                                    <div className="text-xs text-gray-600">
+                                        <p><strong>Q{formData.id}:</strong> {formData.question}</p>
+                                        <p><strong>Difficulty:</strong> {formData.difficulty} | <strong>Time:</strong> {formData.timeLimit} sec | <strong>Points:</strong> {formData.points}</p>
+                                        {formData.options.length > 0 && (
+                                            <div className="mt-1">
+                                                <strong>Options:</strong>
+                                                <ul className="list-disc list-inside ml-3">
+                                                    {formData.options.map((option, index) => (
+                                                        <li key={index} className={option.isCorrect ? 'text-orange-600 font-medium' : ''}>
+                                                            {option.text} {option.isCorrect && '✓'}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>}
+                            )}
+                        </div>
 
                     </div>
                 </div>
