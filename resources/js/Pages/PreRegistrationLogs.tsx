@@ -1,19 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Search, User, Clock, MapPin, Calendar, Filter, BanIcon, UserRoundCheckIcon, Hash, LayoutDashboardIcon, Eye, ChevronLeft } from 'lucide-react';
+import { Search, User, Clock, MapPin, Calendar, Filter, BanIcon, UserRoundCheckIcon, Hash, LayoutDashboardIcon, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { router, usePage } from '@inertiajs/react';
+
 import { PageProps } from '@/types';
 import Swal from 'sweetalert2';
 import { Button } from '@/Components/ui/button';
 type Props = {}
 
+interface PageData {
+    logs: any[];
+    lobbies: any[];
+    auth: any;
+    personFiles: any[];
+    [key: string]: any;
+}
+  
 const PreRegistrationLogs = (props: Props) => {
-    const { logs, lobbies } = usePage().props
-    const { auth } = usePage<PageProps>().props
+    // const { logs, lobbies } = usePage().props
+    // const { auth } = usePage<PageProps>().props
+    const { logs, lobbies, auth , personFiles} = usePage<PageData>().props;
     const [searchTerm, setSearchTerm] = useState('');
     const [filterActive, setFilterActive] = useState('all');
     const [selectedLobby, setSelectedLobby] = useState<number | null>(null);
     const [lobbySearchTerm, setLobbySearchTerm] = useState('');
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [availableLobbies, setAvailableLobbies] = useState<any[]>([]);
 
     useEffect(() => {
@@ -47,7 +58,7 @@ const PreRegistrationLogs = (props: Props) => {
         if (!logout) return 'Active';
         const start = new Date(created);
         const end = new Date(logout);
-        const diff = Math.abs(end - start);
+        const diff = Math.abs(Number(end) - Number(start));
         const minutes = Math.floor(diff / 60000);
         const seconds = Math.floor((diff % 60000) / 1000);
         return `${minutes}m ${seconds}s`;
@@ -195,8 +206,8 @@ const PreRegistrationLogs = (props: Props) => {
     };
     return (
         <AuthenticatedLayout>
-            <div className="min-h-screen bg-gradient-to-br from-red-50 via-amber-50 to-yellow-50 p-6">
-                <div className="max-w-7xl mx-auto">
+            <div className="min-h-screen bg-white p-6">
+                <div className="w-full max-w-full flex flex-col">
                     {/* Header */}
                     <div className='flex justify-between items-center'>
                         <div className="mb-8">
@@ -211,13 +222,26 @@ const PreRegistrationLogs = (props: Props) => {
                         </div>
                     </div>
 
-                    <div className="flex gap-6">
-                        {/* Left Sidebar - Quiz Event Filter */}
-                        <div className="w-80 flex-shrink-0">
+                    <div className="flex flex-col lg:flex-row gap-6">
+                        {/* Left Sidebar - Quiz Event Filter (Collapsible*/}
+                        <div className={`${isSidebarCollapsed ? 'w-0' : 'w-80'} flex-shrink-0 transition-all duration-300 overflow-hidden`}>
                             <div className="bg-white rounded-xl shadow-lg p-6">
-                                <h2 className="text-xl font-bold text-red-600 mb-2">Quiz Event</h2>
-                                <p className="text-sm text-gray-600 mb-4">Select a quiz event to filter logs</p>
-                                
+                                <div className="flex items-center justify-between mb-4">
+                                    <div>
+                                        <h2 className="text-xl font-bold text-red-600 mb-2">Quiz Event</h2>
+                                        <p className="text-sm text-gray-600 mb-4">Select a quiz event to filter logs</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setIsSidebarCollapsed(true)}
+                                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                        type="button"
+                                        title="Collapse sidebar"
+                                    >
+                                        <ChevronLeft className="w-5 h-5 text-gray-600" />
+                                    </button>
+                                </div>
+
+                                {/* Search Input */}
                                 <div className="relative mb-4">
                                     <input
                                         type="text"
@@ -229,27 +253,51 @@ const PreRegistrationLogs = (props: Props) => {
                                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                                 </div>
 
+                                {/* Quiz Event List */}
                                 <div className="space-y-2 max-h-96 overflow-y-auto">
-                                    {filteredLobbies.length === 0 ? (
-                                        <p className="text-gray-500 text-sm text-center py-4">No quiz events found</p>
-                                    ) : (
-                                        filteredLobbies.map((lobby) => (
-                                            <button
-                                                key={lobby.id}
-                                                onClick={() => setSelectedLobby(lobby.id)}
-                                                className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
-                                                    selectedLobby === lobby.id
-                                                        ? 'bg-orange-500 text-white'
-                                                        : 'bg-gray-50 hover:bg-gray-100 text-gray-900'
-                                                }`}
-                                            >
-                                                {lobby.name}
-                                            </button>
-                                        ))
-                                    )}
-                                </div>
+                                <button
+                                    onClick={() => setSelectedLobby(null)}
+                                    className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${selectedLobby === null
+                                    ? 'bg-orange-500 text-white'
+                                    : 'bg-gray-50 hover:bg-gray-100 text-gray-900'
+                                    }`}
+                                    type="button"
+                                >
+                                    All Event Quiz Sessions
+                                </button>
+                                {filteredLobbies.length === 0 ? (
+                                    <p className="text-gray-500 text-sm text-center py-4">No quiz events found</p>
+                                ) : (
+                                    filteredLobbies.map((lobby) => (
+                                        <button
+                                            key={lobby.id}
+                                            onClick={() => setSelectedLobby(lobby.id)}
+                                            className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                                                selectedLobby === lobby.id
+                                                    ? 'bg-orange-500 text-white'
+                                                    : 'bg-gray-50 hover:bg-gray-100 text-gray-900'
+                                            }`}
+                                            type="button"
+                                        >
+                                            {lobby.name}
+                                        </button>
+                                    ))
+                                )}
                             </div>
                         </div>
+                    </div>
+
+                    {/* Collapse/Expand Button when sidebar is collapsed */}
+                    {isSidebarCollapsed && (
+                        <button
+                            onClick={() => setIsSidebarCollapsed(false)}
+                            className="self-start p-2 bg-white rounded-lg shadow-lg hover:bg-gray-50 transition-colors"
+                            type="button"
+                            title="Expand sidebar"
+                        >
+                            <ChevronRight className="w-5 h-5 text-gray-600" />
+                        </button>
+                    )}
 
                         {/* Right Content - Logs Table */}
                         <div className="flex-1">
@@ -325,8 +373,8 @@ const PreRegistrationLogs = (props: Props) => {
                                         </span>
                                     )}
                                 </div>
-                        <div className="overflow-x-auto pr-6 pb-4">
-                            <table className="w-full min-w-[960px]">
+                        <div className="overflow-x-auto pb-4">
+                            <table className="w-full table-auto">
                                 <thead className="bg-gradient-to-r from-red-500 to-amber-500">
                                     <tr>
                                         <th className="px-6 py-4 text-left text-sm font-semibold text-white">Team Name</th>
@@ -348,7 +396,7 @@ const PreRegistrationLogs = (props: Props) => {
                                         >
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center w-fit truncate">
-                                                    <div className="w-fit px-8 truncate h-8 bg-gradient-to-r from-red-400 to-amber-400 rounded-full flex items-center justify-center text-white font-semibold text-sm mr-3">
+                                                    <div className="max-w-[150px] px-3 truncate h-8 bg-gradient-to-r from-red-400 to-amber-400 rounded full flex items-center justify-center text-white font-semibold text-sm mr-3">
                                                         {session.participant?.team || 'N/A'}
                                                     </div>
 
