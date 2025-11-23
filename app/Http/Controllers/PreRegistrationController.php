@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Inertia\Inertia;
 use App\Models\PreRegistration;
 use Illuminate\Http\Request;
 
@@ -12,7 +13,17 @@ class PreRegistrationController extends Controller
      */
     public function index()
     {
-        //
+        $logs = PreRegistration::all();   // example data
+        $lobbies = [];                                         // placeholder
+        $personFiles = [];                                     // placeholder
+
+        return Inertia::render('PreRegistrationLogs', [
+            'logs' => $logs,
+            'lobbies' => $lobbies,
+            'auth' => auth()->user(),
+            'personFiles' => $personFiles,
+        ]);
+ 
     }
 
     /**
