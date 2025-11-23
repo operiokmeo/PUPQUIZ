@@ -12,12 +12,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('username')->nullable()->unique()->after('email');
-            $table->string('student_number')->nullable()->after('username');
-            $table->string('program')->nullable()->after('student_number');
-            $table->string('section')->nullable()->after('program');
-            $table->integer('role')->nullable()->after('section'); // 1 = teacher, 2 = student, 3 = organizer, 4 = member
-            $table->string('department')->nullable()->after('role');
+            if (!Schema::hasColumn('users', 'username')) {
+                $table->string('username')->nullable()->unique()->after('email');
+            }
+            if (!Schema::hasColumn('users', 'student_number')) {
+                $table->string('student_number')->nullable()->after('username');
+            }
+            if (!Schema::hasColumn('users', 'program')) {
+                $table->string('program')->nullable()->after('student_number');
+            }
+            if (!Schema::hasColumn('users', 'section')) {
+                $table->string('section')->nullable()->after('program');
+            }
+            if (!Schema::hasColumn('users', 'role')) {
+                $table->integer('role')->nullable()->after('section'); // 1 = teacher, 2 = student, 3 = organizer, 4 = member
+            }
+            if (!Schema::hasColumn('users', 'department')) {
+                $table->string('department')->nullable()->after('role');
+            }
         });
     }
 

@@ -21,7 +21,7 @@ class Lobby extends Model
 
     public function subjects()
     {
-        return $this->hasMany(Subjects::class);
+        return $this->hasMany(Subjects::class, 'lobby_id');
     }
 
     public function lobbyMngnt()

@@ -41,30 +41,17 @@ class OtpMail extends Mailable
     /**
      * Get the message content definition.
      */
-    // public function content(): Content
-    // {
-    //     return new Content(
-    //         view: 'view.otp',
-    //     );
-    // }
-
-    public function build()
+    public function content(): Content
     {
-        $logoCid = null;
-        $logoPath = public_path('images/LOGO.png');
-
-        if (file_exists($logoPath)) {
-            $logoCid = $this->embed($logoPath);
-        }
-
-        return $this->subject($this->subject_line)
-            ->view('emails.otp')
-            ->with([
+        return new Content(
+            view: 'emails.otp',
+            with: [
                 'name' => $this->name,
                 'email' => $this->email,
                 'body' => $this->body,
-                'logoCid' => $logoCid,
-            ]);
+                'subject_line' => $this->subject_line,
+            ],
+        );
     }
     /**
      * Get the attachments for the message.

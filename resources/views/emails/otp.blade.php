@@ -249,7 +249,14 @@
         <div class="header">
             <div class="logo-section">
                 <div class="company-logo">
-                    @if(!empty($logoCid))
+                    @php
+                        $logoPath = public_path('images/LOGO.png');
+                        $logoCid = null;
+                        if (file_exists($logoPath)) {
+                            $logoCid = $message->embed($logoPath);
+                        }
+                    @endphp
+                    @if($logoCid)
                         <img src="{{ $logoCid }}" alt="App Logo" style="width: 100%; height:100%; object-fit: contain;">
                     @else
                         <img src="{{ asset('images/LOGO.png') }}" alt="App Logo" style="width: 100%; height:100%; object-fit: contain;">
@@ -273,7 +280,16 @@
                 <p>We sent this email to: {{ $email }}</p>
             </div>
 
-            @if(!empty($logoCid))
+            @php
+                if (!isset($logoCid)) {
+                    $logoPath = public_path('images/LOGO.png');
+                    $logoCid = null;
+                    if (file_exists($logoPath)) {
+                        $logoCid = $message->embed($logoPath);
+                    }
+                }
+            @endphp
+            @if($logoCid)
             <div class="school-logo-container">
                 <img src="{{ $logoCid }}" alt="App Logo" style="width: 100%; height:100%;">
             </div>

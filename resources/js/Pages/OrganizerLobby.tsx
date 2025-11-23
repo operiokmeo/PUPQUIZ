@@ -431,9 +431,9 @@ const OrganizerLobby = (props: Props) => {
                                 </Card>
                             ) : availableLobbies && availableLobbies.length > 0 ? (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {availableLobbies.map((al) => (
+                                    {availableLobbies.map((al, index) => (
                                         <Card
-                                            key={al.lobby_code}
+                                            key={al.id || al.lobby_code || `lobby-${index}`}
                                             className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl border border-red-200 transform hover:scale-[1.02] transition-all duration-300 overflow-hidden"
                                         >
                                             <CardHeader className="pb-3">

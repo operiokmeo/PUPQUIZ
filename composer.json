@@ -70,7 +70,7 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "php-http/discovery": true
+            "php-ddhttp/discovery": true
         }
     },
     "minimum-stability": "stable",
