@@ -538,56 +538,82 @@ const OrganizerLobby = (props: Props) => {
                                                 {/* Scheduled Date */}
                                                 <div>
                                                     <p className="text-sm text-gray-500 font-medium">
-                                                        {al.start_date ? 'Scheduled' : 'Created'}
+                                                        {(() => {
+                                                            // Use subject start_date if available, otherwise use lobby start_date
+                                                            // Subject start_date takes precedence over lobby start_date
+                                                            const subjects = al.subjects || [];
+                                                            const subjectWithStartDate = subjects.find((s: any) => s.start_date);
+                                                            const displayDate = subjectWithStartDate?.start_date || al.start_date;
+                                                            return displayDate ? 'Scheduled' : 'Created';
+                                                        })()}
                                                     </p>
                                                     <p className="text-sm font-semibold text-gray-700">
-                                                        {al.start_date ? (() => {
-                                                            // Parse the date string - backend sends in 'Y-m-d H:i:s' format
-                                                            // Treat it as local time (the time the user selected)
-                                                            const dateStr = al.start_date;
-                                                            let date: Date;
+                                                        {(() => {
+                                                            // Use subject start_date if available, otherwise use lobby start_date
+                                                            // Subject start_date takes precedence over lobby start_date
+                                                            const subjects = al.subjects || [];
+                                                            const subjectWithStartDate = subjects.find((s: any) => s.start_date);
+                                                            const displayDate = subjectWithStartDate?.start_date || al.start_date;
                                                             
-                                                            if (dateStr instanceof Date) {
-                                                                date = dateStr;
+                                                            if (displayDate) {
+                                                                // Parse the date string - backend sends in 'Y-m-d H:i:s' format
+                                                                // Treat it as local time (the time the user selected)
+                                                                const dateStr = displayDate;
+                                                                let date: Date;
+                                                                
+                                                                if (dateStr instanceof Date) {
+                                                                    date = dateStr;
+                                                                } else {
+                                                                    // Parse the date string - if it's in 'Y-m-d H:i:s' format, 
+                                                                    // JavaScript will parse it as local time
+                                                                    date = new Date(dateStr.replace(' ', 'T'));
+                                                                }
+                                                                
+                                                                // Format the date in a readable format
+                                                                return date.toLocaleDateString('en-US', {
+                                                                    year: 'numeric',
+                                                                    month: 'short',
+                                                                    day: 'numeric',
+                                                                    hour: '2-digit',
+                                                                    minute: '2-digit',
+                                                                    hour12: true
+                                                                });
                                                             } else {
-                                                                // Parse the date string - if it's in 'Y-m-d H:i:s' format, 
-                                                                // JavaScript will parse it as local time
-                                                                date = new Date(dateStr.replace(' ', 'T'));
+                                                                return al.created_at ? (() => {
+                                                                    const date = al.created_at instanceof Date ? al.created_at : new Date(al.created_at);
+                                                                    return date.toLocaleDateString('en-US', {
+                                                                        year: 'numeric',
+                                                                        month: 'short',
+                                                                        day: 'numeric',
+                                                                        hour: '2-digit',
+                                                                        minute: '2-digit',
+                                                                        hour12: true
+                                                                    });
+                                                                })() : 'Just now';
                                                             }
-                                                            
-                                                            // Format the date in a readable format
-                                                            return date.toLocaleDateString('en-US', {
-                                                                year: 'numeric',
-                                                                month: 'short',
-                                                                day: 'numeric',
-                                                                hour: '2-digit',
-                                                                minute: '2-digit',
-                                                                hour12: true
-                                                            });
-                                                        })() : (al.created_at ? (() => {
-                                                            const date = al.created_at instanceof Date ? al.created_at : new Date(al.created_at);
-                                                            return date.toLocaleDateString('en-US', {
-                                                                year: 'numeric',
-                                                                month: 'short',
-                                                                day: 'numeric',
-                                                                hour: '2-digit',
-                                                                minute: '2-digit',
-                                                                hour12: true
-                                                            });
-                                                        })() : 'Just now')}
+                                                        })()}
                                                     </p>
                                                 </div>
 
                                                 {/* Countdown Timer */}
-                                                {al.start_date && (() => {
-                                                    // Parse the date and check if it's in the future
-                                                    const dateStr = al.start_date;
-                                                    const startDate = dateStr instanceof Date ? dateStr : new Date(dateStr);
-                                                    const now = new Date();
-                                                    return startDate.getTime() > now.getTime();
-                                                })() && (
-                                                    <CountdownTimer startDate={al.start_date} />
-                                                )}
+                                                {(() => {
+                                                    // Use subject start_date if available, otherwise use lobby start_date
+                                                    // Subject start_date takes precedence over lobby start_date
+                                                    const subjects = al.subjects || [];
+                                                    const subjectWithStartDate = subjects.find((s: any) => s.start_date);
+                                                    const displayDate = subjectWithStartDate?.start_date || al.start_date;
+                                                    
+                                                    if (displayDate) {
+                                                        // Parse the date and check if it's in the future
+                                                        const dateStr = displayDate;
+                                                        const startDate = dateStr instanceof Date ? dateStr : new Date(dateStr.replace(' ', 'T'));
+                                                        const now = new Date();
+                                                        if (startDate.getTime() > now.getTime()) {
+                                                            return <CountdownTimer startDate={displayDate} />;
+                                                        }
+                                                    }
+                                                    return null;
+                                                })()}
 
                                                 {/* Participants */}
                                                 {/* <div className="flex items-center justify-between pt-2 border-t border-gray-100">

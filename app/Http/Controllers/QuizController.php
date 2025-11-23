@@ -152,7 +152,7 @@ class QuizController extends Controller
             'questions.*.options.*.text' => 'required_if:questions.*.type,multiple-choice|string',
             'questions.*.options.*.isCorrect' => 'boolean',
             'questions.*.trueFalseAnswer' => 'nullable|boolean',
-            'questions.*.shortAnswer' => 'required_if:questions.*.type,short-answer|string|min:1',
+            'questions.*.shortAnswer' => 'nullable|required_if:questions.*.type,short-answer|string|min:1',
         ]);
 
         DB::transaction(function () use ($request, $quiz) {
@@ -418,7 +418,7 @@ class QuizController extends Controller
             'questions.*.options.*.text' => 'required_if:questions.*.type,multiple-choice|string',
             'questions.*.options.*.isCorrect' => 'boolean',
             'questions.*.trueFalseAnswer' => 'nullable|boolean',
-            'questions.*.shortAnswer' => 'required_if:questions.*.type,short-answer|string|min:1',
+            'questions.*.shortAnswer' => 'nullable|required_if:questions.*.type,short-answer|string|min:1',
             'subject_id' => 'nullable|integer|exists:subjects,id', // Optional subject_id
         ]);
 
