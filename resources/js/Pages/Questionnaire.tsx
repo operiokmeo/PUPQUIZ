@@ -1345,8 +1345,6 @@ const Questionnaire = () => {
                     <p className="text-orange-700 font-medium">Answer:</p>
                     <p className="text-orange-900">{currentQuestion ? currentQuestion['shortAnswer'] : ""}</p>
                   </div>
-                  <div className="flex justify-center">
-
 
                   <div className="relative z-10 mt-12">
                     <p className="text-orange-800 text-2xl font-bold mb-8">
@@ -1480,220 +1478,214 @@ const Questionnaire = () => {
         {/* Answer Options */}
 
         {
-          // Show options for participants when conditions are met, OR always show for organizers
-          // Also show for true/false and short-answer questions
-          (state == "options-revealed" || state == "timer-started" || state == "answer-revealed" && auth.user || state == "" && auth.user || options_revealed == 1 && state != "answer-revealed" && selectedOption != null) || (auth.user && currentQuestion && (currentQuestion["options"] || currentQuestion["type"] == "true-false" || currentQuestion["type"] == "short-answer")) || (currentQuestion && (currentQuestion["type"] == "true-false" || currentQuestion["type"] == "short-answer")) ?
-            <div className="grid grid-cols-2 gap-6 mt-6 justify-center relative w-full">
+  (
+    // Show options when conditions are met OR always for organizers
+    (state == "options-revealed" ||
+     state == "timer-started" ||
+     (state == "answer-revealed" && auth.user) ||
+     (state == "" && auth.user) ||
+     (options_revealed == 1 && state != "answer-revealed" && selectedOption != null)
+    ) ||
+    (auth.user && currentQuestion && (currentQuestion["options"] ||
+      currentQuestion["type"] == "true-false" || currentQuestion["type"] == "short-answer")) ||
+    (currentQuestion && (currentQuestion["type"] == "true-false" || currentQuestion["type"] == "short-answer"))
+  ) ? (
+    <div className="grid grid-cols-2 gap-6 mt-6 justify-center relative w-full">
 
-              {currentQuestion && (() => {
-                // Handle true/false questions first
-                if (currentQuestion["type"] == "true-false") {
-                  const isDisabled = !(state == "timer-started" && seconds > 0);
-                  if (!auth.user) {
-                    // Participant view for true/false
-                    return (
-                      <div className='w-full col-span-2'>
-                        <RadioGroup
-                          onValueChange={(value) => submitAnswer(value)}
-                          className='flex p-8 bg-gradient-to-b from-orange-600 via-orange-700 to-orange-900 backdrop-blur-md rounded-3xl shadow-2xl border-2 border-orange-800 w-full gap-8 relative'
-                        >
-                          {/* Subtle shine effect */}
-                          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent rounded-3xl pointer-events-none"></div>
+      {currentQuestion && (() => {
+        // TRUE/FALSE
+        if (currentQuestion["type"] == "true-false") {
+          const isDisabled = !(state == "timer-started" && seconds > 0);
 
-                          <div className="flex items-center justify-center flex-1 relative group">
-                            <div className="absolute inset-0 bg-gradient-to-b from-yellow-400/30 to-orange-300/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
+          // PARTICIPANT VIEW
+          if (!auth.user) {
+            return (
+              <div className='w-full col-span-2'>
+                <RadioGroup
+                  onValueChange={(value) => submitAnswer(value)}
+                  className='flex p-8 bg-gradient-to-b from-orange-600 via-orange-700 to-orange-900 backdrop-blur-md rounded-3xl shadow-2xl border-2 border-orange-800 w-full gap-8 relative'
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent rounded-3xl pointer-events-none"></div>
 
-                            <div className="relative flex items-center justify-center space-x-4 p-8 rounded-2xl bg-gradient-to-b from-orange-500 via-orange-600 to-orange-700 border-2 border-orange-400 shadow-[inset_0_2px_8px_rgba(0,0,0,0.3),0_8px_16px_rgba(0,0,0,0.6)] active:shadow-[inset_0_4px_12px_rgba(0,0,0,0.5),0_2px_4px_rgba(0,0,0,0.6)] active:translate-y-1 transition-all duration-150 cursor-pointer w-full">
-                              <RadioGroupItem
-                                disabled={isDisabled}
-                                value="true"
-                                id="option-one"
-                                className="border-2 border-white text-white focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-orange-700 h-9 w-9 data-[state=checked]:bg-white data-[state=checked]:border-yellow-300 data-[state=checked]:shadow-[0_0_20px_rgba(255,255,255,0.8)] transition-all"
-                              />
-                              <Label
-                                htmlFor="option-one"
-                                className="text-5xl font-black text-white cursor-pointer drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] group-hover:drop-shadow-[0_4px_12px_rgba(255,255,255,0.3)] transition-all duration-300 tracking-wider select-none"
-                              >
-                                TRUE
-                              </Label>
-                            </div>
-                          </div>
+                  {/* TRUE BUTTON */}
+                  <div className="flex items-center justify-center flex-1 relative group">
+                    <div className="absolute inset-0 bg-gradient-to-b from-yellow-400/30 to-orange-300/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
 
-                          <div className='w-[3px] bg-gradient-to-b from-transparent via-orange-400 to-transparent self-stretch rounded-full shadow-[0_0_8px_rgba(251,146,60,0.5)]'></div>
-
-                          <div className="flex items-center justify-center flex-1 relative group">
-                            <div className="absolute inset-0 bg-gradient-to-b from-yellow-400/30 to-orange-300/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
-
-                            <div className="relative flex items-center justify-center space-x-4 p-8 rounded-2xl bg-gradient-to-b from-orange-500 via-orange-600 to-orange-700 border-2 border-orange-400 shadow-[inset_0_2px_8px_rgba(0,0,0,0.3),0_8px_16px_rgba(0,0,0,0.6)] active:shadow-[inset_0_4px_12px_rgba(0,0,0,0.5),0_2px_4px_rgba(0,0,0,0.6)] active:translate-y-1 transition-all duration-150 cursor-pointer w-full">
-                              <RadioGroupItem
-                                disabled={isDisabled}
-                                value="false"
-                                id="option-two"
-                                className="border-2 border-white text-white focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-orange-700 h-9 w-9 data-[state=checked]:bg-white data-[state=checked]:border-yellow-300 data-[state=checked]:shadow-[0_0_20px_rgba(255,255,255,0.8)] transition-all"
-                              />
-                              <Label
-                                htmlFor="option-two"
-                                className="text-5xl font-black text-white cursor-pointer drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] group-hover:drop-shadow-[0_4px_12px_rgba(255,255,255,0.3)] transition-all duration-300 tracking-wider select-none"
-                              >
-                                FALSE
-                              </Label>
-                            </div>
-                          </div>
-                        </RadioGroup>
-                      </div>
-                    );
-                  } else {
-                    // Organizer view for true/false - show read-only
-                    return (
-                      <div className='w-full col-span-2 flex gap-8'>
-                        <div className={`flex-1 p-8 rounded-2xl border-2 ${
-                          currentQuestion["trueFalseAnswer"] == 1 || currentQuestion["true_false_answer"] == 1
-                            ? 'bg-gradient-to-b from-green-400 via-green-500 to-green-600 border-green-300'
-                            : 'bg-gradient-to-b from-gray-300 via-gray-400 to-gray-500 border-gray-200'
-                        }`}>
-                          <div className="text-5xl font-black text-white text-center">TRUE</div>
-                          {(currentQuestion["trueFalseAnswer"] == 1 || currentQuestion["true_false_answer"] == 1) && (
-                            <div className="text-center text-3xl text-white mt-2">✓</div>
-                          )}
-                        </div>
-                        <div className={`flex-1 p-8 rounded-2xl border-2 ${
-                          currentQuestion["trueFalseAnswer"] == 0 || currentQuestion["true_false_answer"] == 0
-                            ? 'bg-gradient-to-b from-green-400 via-green-500 to-green-600 border-green-300'
-                            : 'bg-gradient-to-b from-gray-300 via-gray-400 to-gray-500 border-gray-200'
-                        }`}>
-                          <div className="text-5xl font-black text-white text-center">FALSE</div>
-                          {(currentQuestion["trueFalseAnswer"] == 0 || currentQuestion["true_false_answer"] == 0) && (
-                            <div className="text-center text-3xl text-white mt-2">✓</div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  }
-                }
-                
-                // Handle multiple-choice questions with options
-                if (currentQuestion["options"]) {
-                try {
-                  // Parse options for both participants and organizers
-                  const options = JSON.parse(currentQuestion["options"]);
-                  
-                  if (!auth.user) {
-                    // Participant view - interactive buttons
-                    return options.map((option: any, index: number) => {
-                      const isSelected = selectedOption?.text === option.text;
-                      const isDisabled = !(state == "timer-started" && seconds > 0);
-                      return (
-                        <Button
-                          disabled={isDisabled}
-                          key={index}
-                          onClick={() => submitAnswer(option)}
-                          className={`
-    relative group
-    ${isSelected
-                              ? 'bg-gradient-to-b from-green-400 via-green-500 to-green-600 border-green-300'
-                              : isDisabled
-                                ? 'bg-gradient-to-b from-orange-300 via-orange-400 to-orange-500 border-orange-200'
-                                : 'bg-gradient-to-b from-orange-400 via-orange-500 to-orange-600 hover:from-orange-300 hover:via-orange-400 hover:to-orange-500 border-orange-300'}
-    text-white rounded-2xl transition-all duration-150 text-center text-4xl capitalize font-black p-10
-    shadow-[inset_0_2px_6px_rgba(0,0,0,0.2),0_6px_16px_rgba(0,0,0,0.3)]
-    ${isDisabled
-                              ? 'cursor-not-allowed opacity-75'
-                              : 'hover:shadow-[inset_0_2px_6px_rgba(0,0,0,0.2),0_8px_20px_rgba(0,0,0,0.4)] active:shadow-[inset_0_4px_10px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)] active:translate-y-1'}
-    w-full break-words whitespace-normal border-2
-    drop-shadow-[0_2px_6px_rgba(0,0,0,0.2)]
-    tracking-wide
-  `}
-                        >
-                          {/* Glow effect on hover */}
-                          {!isDisabled && !isSelected && (
-                            <div className="absolute inset-0 bg-gradient-to-b from-yellow-300/40 to-orange-200/30 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100 -z-10"></div>
-                          )}
-
-                          {/* Shine overlay */}
-                          <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent rounded-2xl pointer-events-none"></div>
-
-                          <span className="relative z-10">{option.text}</span>
-                        </Button>
-
-                      );
-                    });
-                  }
-
-                  // Organizer view - display options as read-only
-                  return options.map((option: any, index: number) => {
-                    const isCorrect = option.isCorrect || option.is_correct;
-                    return (
-                      <div
-                        key={index}
-                        className={`
-                          relative group
-                          ${isCorrect
-                            ? 'bg-gradient-to-b from-green-400 via-green-500 to-green-600 border-green-300'
-                            : 'bg-gradient-to-b from-gray-300 via-gray-400 to-gray-500 border-gray-200'}
-                          text-white rounded-2xl text-center text-4xl capitalize font-black p-10
-                          shadow-[inset_0_2px_6px_rgba(0,0,0,0.2),0_6px_16px_rgba(0,0,0,0.3)]
-                          w-full break-words whitespace-normal border-2
-                          drop-shadow-[0_2px_6px_rgba(0,0,0,0.2)]
-                          tracking-wide
-                        `}
-                      >
-                        {/* Shine overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent rounded-2xl pointer-events-none"></div>
-                        
-                        <div className="relative z-10 flex items-center justify-center gap-3">
-                          <span>{option.text}</span>
-                          {isCorrect && (
-                            <span className="text-3xl">✓</span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  });
-
-                } catch (error) {
-                  // Fallback: if options parsing fails, show error
-                  console.error('Error parsing options:', error);
-                  return null;
-                }
-              })()}
-              
-              {/* Handle short-answer questions separately */}
-              {currentQuestion && currentQuestion["type"] == "short-answer" && !currentQuestion["options"] && (() => {
-                if (!auth.user) {
-                  return (
-                    <div className='w-full col-span-2 p-8 bg-gradient-to-b from-orange-600 via-orange-700 to-orange-800 backdrop-blur-md rounded-3xl shadow-2xl border-2 border-orange-800 flex gap-y-6 flex-col '>
-                      {/* Subtle shine effect */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent rounded-3xl pointer-events-none"></div>
-
-                      <div className="relative">
-                        <Input
-                          disabled={shortAnswerSubmitted || state == 'timer-started' ? false : true}
-                          value={selectedOption || ''}
-                          onChange={({ target }) => setSelectedOption(target.value)}
-                          placeholder='Enter your answer'
-                          className='w-full h-20 border-2 border-orange-400 bg-gradient-to-b from-orange-500 via-orange-600 to-orange-700 placeholder:text-orange-200 text-white text-2xl font-medium px-6 py-6 rounded-2xl shadow-[inset_0_2px_8px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.6)] focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-orange-700 focus:border-orange-300 transition-all duration-300'
-                        />
-                      </div>
-
-                      <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-b from-yellow-400/30 to-orange-300/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
-
-                        <Button
-                          onClick={() => { submitAnswer(selectedOption); setShortAnswerSubmitted(true) }}
-                          disabled={shortAnswerSubmitted || state == 'timer-started' ? false : true}
-                          className='relative w-full bg-gradient-to-b from-orange-500 via-orange-600 to-orange-700 hover:from-orange-400 hover:via-orange-500 hover:to-orange-600 text-white text-2xl font-black rounded-2xl px-8 py-6 shadow-[inset_0_2px_8px_rgba(0,0,0,0.3),0_8px_16px_rgba(0,0,0,0.6)] hover:shadow-[inset_0_2px_8px_rgba(0,0,0,0.3),0_12px_20px_rgba(0,0,0,0.8)] active:shadow-[inset_0_4px_12px_rgba(0,0,0,0.5),0_2px_4px_rgba(0,0,0,0.6)] active:translate-y-1 transition-all duration-150 border-2 border-orange-400 tracking-wide drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]'
-                        >
-                          SUBMIT ANSWER
-                        </Button>
-                      </div>
+                    <div className="relative flex items-center justify-center space-x-4 p-8 rounded-2xl bg-gradient-to-b from-orange-500 via-orange-600 to-orange-700 border-2 border-orange-400 shadow-[inset_0_2px_8px_rgba(0,0,0,0.3),0_8px_16px_rgba(0,0,0,0.6)] active:shadow-[inset_0_4px_12px_rgba(0,0,0,0.5),0_2px_4px_rgba(0,0,0,0.6)] active:translate-y-1 transition-all duration-150 cursor-pointer w-full">
+                      <RadioGroupItem
+                        disabled={isDisabled}
+                        value="true"
+                        id="option-one"
+                        className="border-2 border-white text-white focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-orange-700 h-9 w-9 data-[state=checked]:bg-white data-[state=checked]:border-yellow-300 data-[state=checked]:shadow-[0_0_20px_rgba(255,255,255,0.8)] transition-all"
+                      />
+                      <Label htmlFor="option-one" className="text-5xl font-black text-white cursor-pointer drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] tracking-wider select-none">
+                        TRUE
+                      </Label>
                     </div>
-                  );
-                }
-                return null;
-              })()}
+                  </div>
 
-            </div> : ""
+                  <div className='w-[3px] bg-gradient-to-b from-transparent via-orange-400 to-transparent self-stretch rounded-full shadow-[0_0_8px_rgba(251,146,60,0.5)]'></div>
+
+                  {/* FALSE BUTTON */}
+                  <div className="flex items-center justify-center flex-1 relative group">
+                    <div className="absolute inset-0 bg-gradient-to-b from-yellow-400/30 to-orange-300/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
+
+                    <div className="relative flex items-center justify-center space-x-4 p-8 rounded-2xl bg-gradient-to-b from-orange-500 via-orange-600 to-orange-700 border-2 border-orange-400 shadow-[inset_0_2px_8px_rgba(0,0,0,0.3),0_8px_16px_rgba(0,0,0,0.6)] active:shadow-[inset_0_4px_12px_rgba(0,0,0,0.5),0_2px_4px_rgba(0,0,0,0.6)] active:translate-y-1 transition-all duration-150 cursor-pointer w-full">
+                      <RadioGroupItem
+                        disabled={isDisabled}
+                        value="false"
+                        id="option-two"
+                        className="border-2 border-white text-white focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-orange-700 h-9 w-9 data-[state=checked]:bg-white data-[state=checked]:border-yellow-300 data-[state=checked]:shadow-[0_0_20px_rgba(255,255,255,0.8)] transition-all"
+                      />
+                      <Label htmlFor="option-two" className="text-5xl font-black text-white cursor-pointer drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] tracking-wider select-none">
+                        FALSE
+                      </Label>
+                    </div>
+                  </div>
+                </RadioGroup>
+              </div>
+            );
+          }
+
+          // ORGANIZER VIEW
+          return (
+            <div className='w-full col-span-2 flex gap-8'>
+              <div className={`flex-1 p-8 rounded-2xl border-2 ${
+                currentQuestion["trueFalseAnswer"] == 1 || currentQuestion["true_false_answer"] == 1
+                  ? 'bg-gradient-to-b from-green-400 via-green-500 to-green-600 border-green-300'
+                  : 'bg-gradient-to-b from-gray-300 via-gray-400 to-gray-500 border-gray-200'
+              }`}>
+                <div className="text-5xl font-black text-white text-center">TRUE</div>
+                {(currentQuestion["trueFalseAnswer"] == 1 || currentQuestion["true_false_answer"] == 1) &&
+                  <div className="text-center text-3xl text-white mt-2">✓</div>
+                }
+              </div>
+
+              <div className={`flex-1 p-8 rounded-2xl border-2 ${
+                currentQuestion["trueFalseAnswer"] == 0 || currentQuestion["true_false_answer"] == 0
+                  ? 'bg-gradient-to-b from-green-400 via-green-500 to-green-600 border-green-300'
+                  : 'bg-gradient-to-b from-gray-300 via-gray-400 to-gray-500 border-gray-200'
+              }`}>
+                <div className="text-5xl font-black text-white text-center">FALSE</div>
+                {(currentQuestion["trueFalseAnswer"] == 0 || currentQuestion["true_false_answer"] == 0) &&
+                  <div className="text-center text-3xl text-white mt-2">✓</div>
+                }
+              </div>
+            </div>
+          );
         }
+
+        // MULTIPLE CHOICE
+        if (currentQuestion["options"]) {
+          try {
+            const options = JSON.parse(currentQuestion["options"]);
+
+            // PARTICIPANTS
+            if (!auth.user) {
+              return options.map((option, index) => {
+                const isSelected = selectedOption?.text === option.text;
+                const isDisabled = !(state == "timer-started" && seconds > 0);
+
+                return (
+                  <Button
+                    disabled={isDisabled}
+                    key={index}
+                    onClick={() => submitAnswer(option)}
+                    className={`
+                      relative group
+                      ${
+                        isSelected
+                          ? 'bg-gradient-to-b from-green-400 via-green-500 to-green-600 border-green-300'
+                          : isDisabled
+                            ? 'bg-gradient-to-b from-orange-300 via-orange-400 to-orange-500 border-orange-200'
+                            : 'bg-gradient-to-b from-orange-400 via-orange-500 to-orange-600 hover:from-orange-300 hover:via-orange-400 hover:to-orange-500 border-orange-300'
+                      }
+                      text-white rounded-2xl transition-all duration-150 text-center text-4xl capitalize font-black p-10
+                      shadow-[inset_0_2px_6px_rgba(0,0,0,0.2),0_6px_16px_rgba(0,0,0,0.3)]
+                      ${isDisabled ? 'cursor-not-allowed opacity-75' : 'hover:shadow-[inset_0_2px_6px_rgba(0,0,0,0.2),0_8px_20px_rgba(0,0,0,0.4)] active:shadow-[inset_0_4px_10px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)] active:translate-y-1'}
+                      w-full break-words whitespace-normal border-2
+                      drop-shadow-[0_2px_6px_rgba(0,0,0,0.2)]
+                      tracking-wide
+                    `}
+                  >
+                    {!isDisabled && !isSelected && (
+                      <div className="absolute inset-0 bg-gradient-to-b from-yellow-300/40 to-orange-200/30 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100 -z-10"></div>
+                    )}
+
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent rounded-2xl pointer-events-none"></div>
+
+                    <span className="relative z-10">{option.text}</span>
+                  </Button>
+                );
+              });
+            }
+
+            // ORGANIZER VIEW
+            return options.map((option, index) => {
+              const isCorrect = option.isCorrect || option.is_correct;
+              return (
+                <div
+                  key={index}
+                  className={`
+                    relative group
+                    ${
+                      isCorrect
+                        ? 'bg-gradient-to-b from-green-400 via-green-500 to-green-600 border-green-300'
+                        : 'bg-gradient-to-b from-gray-300 via-gray-400 to-gray-500 border-gray-200'
+                    }
+                    text-white rounded-2xl text-center text-4xl capitalize font-black p-10
+                    shadow-[inset_0_2px_6px_rgba(0,0,0,0.2),0_6px_16px_rgba(0,0,0,0.3)]
+                    w-full break-words whitespace-normal border-2
+                    drop-shadow-[0_2px_6px_rgba(0,0,0,0.2)]
+                    tracking-wide
+                  `}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent rounded-2xl pointer-events-none"></div>
+
+                  <div className="relative z-10 flex items-center justify-center gap-3">
+                    <span>{option.text}</span>
+                    {isCorrect && <span className="text-3xl">✓</span>}
+                  </div>
+                </div>
+              );
+            });
+          } catch (error) {
+            console.error('Error parsing options:', error);
+            return null;
+          }
+        }
+      })()}
+
+      {/* SHORT ANSWER */}
+      {currentQuestion && currentQuestion["type"] == "short-answer" && !currentQuestion["options"] && (
+        !auth.user ? (
+          <div className='w-full col-span-2 p-8 bg-gradient-to-b from-orange-600 via-orange-700 to-orange-800 backdrop-blur-md rounded-3xl shadow-2xl border-2 border-orange-800 flex gap-y-6 flex-col relative'>
+
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent rounded-3xl pointer-events-none"></div>
+
+            <Input
+              disabled={shortAnswerSubmitted || state == 'timer-started' ? false : true}
+              value={selectedOption || ''}
+              onChange={({ target }) => setSelectedOption(target.value)}
+              placeholder='Enter your answer'
+              className='w-full h-20 border-2 border-orange-400 bg-gradient-to-b from-orange-500 via-orange-600 to-orange-700 placeholder:text-orange-200 text-white text-2xl font-medium px-6 py-6 rounded-2xl shadow-[inset_0_2px_8px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.6)]'
+            />
+
+            <Button
+              onClick={() => { submitAnswer(selectedOption); setShortAnswerSubmitted(true); }}
+              disabled={shortAnswerSubmitted || state == 'timer-started' ? false : true}
+              className='relative w-full bg-gradient-to-b from-orange-500 via-orange-600 to-orange-700 hover:from-orange-400 hover:via-orange-500 hover:to-orange-600 text-white text-2xl font-black rounded-2xl px-8 py-6 shadow-[inset_0_2px_8px_rgba(0,0,0,0.3),0_8px_16px_rgba(0,0,0,0.6)] border-2 border-orange-400'
+            >
+              SUBMIT ANSWER
+            </Button>
+          </div>
+        ) : null
+      )}
+
+    </div>
+  ) : null
+}
+
 
         {
           state == "answer-revealed" && !auth.user ?
