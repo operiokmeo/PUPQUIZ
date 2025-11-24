@@ -272,7 +272,7 @@ const OrganizerLobby = (props: Props) => {
     return (
         <AuthenticatedLayout>
             <Head title="Event Rooms" />
-            <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex flex-col p-6">
+            <div className="min-h-screen bg-white p-6">
 
 
                 <div className='bg-white/80 backdrop-blur-sm grid rounded-xl shadow-lg p-6 gap-6'>

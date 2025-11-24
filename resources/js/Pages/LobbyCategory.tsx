@@ -135,7 +135,7 @@ export default function LobbyCategory() {
     <AuthenticatedLayout>
       <Head title="Event Rooms Category" />
 
-      <div className="p-6 bg-gradient-to-br from-red-50 to-red-100 min-h-screen">
+      <div className="p-6 bg-white min-h-screen">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-red-800 tracking-tight">All Lobbies with Code</h1>
           <div 
