@@ -283,7 +283,7 @@ Route::get('/manage-pre-registration/{lobby_code}', function ($lobby_code) {
     ]);
 })->name('manage-pre-registration');
 
-Route::post('/manage-pre-registration', [ParticipantController::class, "managePreRegistration"])->name('manage-pre-registration');
+Route::post('/manage-pre-registration', [ParticipantController::class, "managePreRegistration"])->name('manage-pre-registration.show');
 // Route::get('/lobby/{id}/{subject_id}/{team_id}', function ($id, $subject_id,$team_id) {
 //     $subject = Subjects::where('id', $subject_id)
 //     ->get();
