@@ -641,7 +641,7 @@ Route::get('/quizzes/{quiz}/live', function (App\Models\Quiz $quiz) {
 })->name('quizzes.live_session');
 require __DIR__ . '/auth.php';
 
-Route::post('/participant', [ParticipantController::class, 'store'])->name('participant');
+Route::post('/participant', [ParticipantController::class, 'store'])->name('participant.post');
 Route::post('/participant/verify-team', [ParticipantController::class, 'verify'])->name('participant.verify-team');
 
 
