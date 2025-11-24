@@ -147,21 +147,73 @@ const PreRegistrationLogs = (props: Props) => {
 
         // --- TEAM LEADER INFO ---
         const leader = session.participant;
-
         const leaderHTML = `
-            <div class="mb-6 p-4 border rounded-lg bg-gray-50">
-                <h2 class="text-2xl font-bold text-orange-600 mb-4">Team Leader Information</h2>
+            <div class="mb-6 p-4 border rounded-lg bg-orange-50">
+                <h2 class="text-2xl font-bold text-orange-600 mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Team Leader Information
+                </h2>
 
-                <p><strong>Full Name:</strong> ${leader.team_leader}</p>
-                <p><strong>Student ID:</strong> ${leader.student_number || "N/A"}</p>
-                <p><strong>Section:</strong> ${leader.course_year|| "N/A"}</p>
-                <p><strong>Email:</strong> ${leader.team_leader_email}</p>
-                <p><strong>Contact Number:</strong> ${leader.contact_number}</p>
+                <p class="flex items-center gap-2">
+                    <!-- Name Tag Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-orange-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 7h18M3 11h18M7 15h10M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" />
+                    </svg>
+                    <strong>Full Name:</strong> ${leader.team_leader}
+                </p>
+
+                <p class="flex items-center gap-2 mt-2">
+                    <!-- ID Card Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 7h16M4 11h8M4 15h5M15 11h5M15 15h5M4 5h16a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V7a2 2 0 012-2z" />
+                    </svg>
+                    <strong>Student ID:</strong> ${leader.student_number || "N/A"}
+                </p>
+
+                <p class="flex items-center gap-2 mt-2">
+                    <!-- Section Icon (layers) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4M3 19l9 4 9-4" />
+                    </svg>
+                    <strong>Section:</strong> ${leader.course_year || "N/A"}
+                </p>
+
+                <p class="flex items-center gap-2 mt-2">
+                    <!-- Email / Gmail Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                    </svg>
+                    <strong>Email:</strong> ${leader.team_leader_email}
+                </p>
+
+                <p class="flex items-center gap-2 mt-2">
+                    <!-- Phone Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 5a2 2 0 012-2h2l3 6-2 2a11 11 0 005 5l2-2 6 3v2a2 2 0 01-2 2h-1C9.82 21 3 14.18 3 6V5z" />
+                    </svg>
+                    <strong>Contact Number:</strong> ${leader.contact_number}
+                </p>
             </div>
         `;
         
         const filesHTML = Object.entries(grouped)
             .map(([personName, personFiles]) => {
+
+                // If person has NO FILES
+                if (personFiles.length === 0) {
+                    return `
+                        <div class="mb-6 p-4 border rounded-lg bg-orange-50">
+                            <h3 class="text-xl font-bold text-orange-600 mb-4">Submitted Requirements</h3>
+                            <p class="text-gray-600 italic">No files uploaded.</p>
+                        </div>
+                    `;
+                }
                 
                 const fileCards = personFiles
                     .map((file) => {
@@ -169,38 +221,45 @@ const PreRegistrationLogs = (props: Props) => {
                         const name = (file.name || "Untitled").replace(/\s*\(.*?\)\s*/, "");
                         const ext = url.split(".").pop()?.toLowerCase();
 
+                        // check if participant uploaded file
+                        if (!url || url.includes("undefined") || url.includes("null")) {
+                            return `
+                                <div class="file-card">
+                                    <div class="file-inner">
+                                        <h4 class="file-title">${name}</h4>
+                                        <div class="file-empty">
+                                            <span class="file-empty-text">No file uploaded</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+
                         const isPDF = ext === "pdf";
                         const isImage = ["jpg","jpeg","png","gif","webp","svg"].includes(ext);
 
                         if (isPDF) {
                             return `
-                                <div class="w-1/3 p-2 text-center">
-                                    <h4 class="font-semibold text-gray-700 mb-2">${name}</h4>
-                                    <iframe 
-                                        src="${url}"
-                                        width="100%"
-                                        height="300px"
-                                        style="border:1px solid #ddd; border-radius:8px;"
-                                    ></iframe>
-                                    <a href="${url}" target="_blank" class="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
-                                        Open in New Tab
-                                    </a>
+                                <div class="file-card">
+                                    <div class="file-inner">
+                                        <h4 class="file-title">${name}</h4>
+                                        <iframe 
+                                            src="${url}" 
+                                            class="rounded-lg shadow-sm mb-2"
+                                            style="width:100%; height:200px;"></iframe>
+                                        <a href="${url}" target="_blank" class="small-btn">Open</a>
+                                    </div>
                                 </div>
                             `;
                         }
 
                         if (isImage) {
                             return `
-                                <div class="w-1/3 p-2 text-center">
-                                    <h4 class="font-semibold text-gray-700 mb-2">${name}</h4>
-                                    <img 
-                                        src="${url}" 
-                                        alt="${name}" 
-                                        style="max-width:100%; height:auto; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);"
-                                    />
-                                    <a href="${url}" target="_blank" class="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
-                                        View Full Size
-                                    </a>
+                                <div class="file-card">
+                                    <div class="file-inner">
+                                        <h4 class="file-title">${name}</h4>
+                                        <img src="${url}" class="file-image" onclick="window.open('${url}', '_blank')" />
+                                    </div>
                                 </div>
                             `;
                         }
@@ -218,8 +277,8 @@ const PreRegistrationLogs = (props: Props) => {
                     .join("");
 
                 return `
-                    <div class="mb-6 p-4 border rounded-lg bg-gray-50">
-                        <h3 class="text-xl font-bold text-orange-600 mb-4">Submitted Requirements</h3>
+                    <div class="section-card">
+                        <h3 class="section-title">Submitted Requirements</h3>
                         <div class="flex flex-wrap -m-2">
                             ${fileCards}
                         </div>
@@ -543,7 +602,7 @@ const PreRegistrationLogs = (props: Props) => {
                                                             {
                                                                 url: '/storage/' + session.participant.consent_form,
                                                                 type: 'image',
-                                                                name: `Consent Form (${session.participant.team_leader})`
+                                                                name: `Signed Consent Form (${session.participant.team_leader})`
                                                             }
                                                         ];
 
@@ -562,7 +621,7 @@ const PreRegistrationLogs = (props: Props) => {
                                                                 {
                                                                     url: '/storage/' + member.requirements.consentForm,
                                                                     type: 'image',
-                                                                    name: `Consent Form (${member.name})`
+                                                                    name: `Signed Consent Form (${member.name})`
                                                                 }
                                                             );
                                                         });
