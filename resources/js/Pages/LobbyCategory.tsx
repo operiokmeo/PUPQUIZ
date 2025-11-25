@@ -89,15 +89,18 @@ export default function LobbyCategory() {
     }
     
     // Combine date and time into a single datetime string (for adding to existing lobby)
-    const selectedDate = date instanceof Date ? date : new Date(date);
+    // Use local time formatting to avoid timezone conversion issues
+    const selectedDate = date instanceof Date ? new Date(date.getTime()) : new Date(date);
     const [hours, minutes] = time.split(':');
     const combinedDateTime = new Date(selectedDate);
     combinedDateTime.setHours(parseInt(hours, 10));
     combinedDateTime.setMinutes(parseInt(minutes, 10));
     combinedDateTime.setSeconds(0);
     
-    // Format as ISO string for backend (Y-m-d H:i:s format)
-    const dateTimeString = combinedDateTime.toISOString().slice(0, 19).replace('T', ' ');
+    // Format as local time string (Y-m-d H:i:s format) without UTC conversion
+    // This ensures the time displayed matches what the user selected
+    const pad = (value: number) => value.toString().padStart(2, '0');
+    const dateTimeString = `${combinedDateTime.getFullYear()}-${pad(combinedDateTime.getMonth() + 1)}-${pad(combinedDateTime.getDate())} ${pad(combinedDateTime.getHours())}:${pad(combinedDateTime.getMinutes())}:${pad(combinedDateTime.getSeconds())}`;
     
     return {
       ...data,

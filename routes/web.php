@@ -741,9 +741,12 @@ Route::get('/questionnaire/{id}/{team_id}/{subject_id}', function ($id, $team_id
         ->where("archive", 0)
         ->firstOrFail();
 
-    // Check if event start_date is in the future - show EventReminder
-    if ($lobby_event_now->start_date) {
-        $start = Carbon::parse($lobby_event_now->start_date)->setTimezone('Asia/Manila');
+    // Check if subject start_date is in the future - show EventReminder
+    // Subject start_date takes precedence over lobby start_date (consistent with lobby route)
+    $startDateToCheck = $subject->start_date ?? $lobby_event_now->start_date;
+    
+    if ($startDateToCheck) {
+        $start = Carbon::parse($startDateToCheck)->setTimezone('Asia/Manila');
         
         if ($now->lessThan($start)) {
             $diff = $now->diff($start); // DateInterval object
