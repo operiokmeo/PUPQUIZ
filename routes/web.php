@@ -890,7 +890,7 @@ Route::get('/leaderboard/{id}/{subject_id}', [ParticipantController::class, 'lea
 Route::get('/currentQuestionLeaderboard/{id}/{question_id}', [ParticipantController::class, 'currentQuestionLeaderboard'])->name('currentQuestionLeaderboard');
 Route::get('/participant-code-update/{id}/{code}', [ParticipantController::class, 'updateTeamCode'])->name('participant-code-update');
 Route::get('/participant-shor-answer/{id}/{subject_id}', [ParticipantController::class, 'shortAnswer'])->name('participant-shor-answer');
-Route::post('/participant-answer-update', [ParticipantController::class, 'updateAns'])->name('participant-shor-answer');
+Route::post('/participant-answer-update', [ParticipantController::class, 'updateAns'])->name('participant-shor-answer.post');
 
 Route::get('/report/teams/excel/{lobby_id}/{subject_id}', [ReportController::class, 'downloadTeamsReport']);
 Route::get('/report/lobby-management/{lobby_id?}', [ReportController::class, 'downloadLobbyManagementReport'])->name('report.lobby-management');
