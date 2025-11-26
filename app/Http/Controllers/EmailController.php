@@ -53,6 +53,19 @@ class EmailController extends Controller
 
         // Log the user in
         Auth::login($user);
+        
+        // Create login log entry after successful OTP verification
+        // This ensures that next time the user logs in, they won't need OTP (first-time login only)
+        if (DB::getSchemaBuilder()->hasTable('login_logs')) {
+            $loginLog = LoginLogs::where('email', $request->email)->first();
+            if (!$loginLog) {
+                LoginLogs::create([
+                    'user_id' => $user->id,
+                    'email' => $request->email,
+                ]);
+            }
+        }
+        
         return response()->json(['success' => 'Logged In Successfully'], 200);
     }
 

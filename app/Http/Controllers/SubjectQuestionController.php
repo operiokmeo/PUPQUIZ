@@ -66,15 +66,20 @@ class SubjectQuestionController extends Controller
         ];
         Subjects::where('id', $request->subject_id)->update($updateData);
         $question_data = json_decode($request->input("data"));
-        foreach ($question_data as $question) {
+        foreach ($question_data as $index => $question) {
             if (
                 isset($question->type)
                 && $question->type === 'short-answer'
-                && (!isset($question->shortAnswer) || trim($question->shortAnswer) === '')
             ) {
-                throw ValidationException::withMessages([
-                    'shortAnswer' => 'Short answer questions require a correct answer.',
-                ]);
+                // Ensure shortAnswer is a string and not empty
+                $shortAnswer = isset($question->shortAnswer) ? (string)$question->shortAnswer : '';
+                $shortAnswer = trim($shortAnswer);
+                
+                if ($shortAnswer === '') {
+                    throw ValidationException::withMessages([
+                        "questions.{$index}.shortAnswer" => 'The questions.' . $index . '.shortAnswer field must be a string.',
+                    ]);
+                }
             }
         }
 
@@ -89,7 +94,9 @@ class SubjectQuestionController extends Controller
 
             $shortAnswer = null;
             if ($question->type === 'short-answer') {
-                $trimmed = trim($question->shortAnswer ?? '');
+                // Ensure shortAnswer is always a string (never null)
+                $shortAnswerValue = isset($question->shortAnswer) ? (string)$question->shortAnswer : '';
+                $trimmed = trim($shortAnswerValue);
                 $shortAnswer = $trimmed !== '' ? $trimmed : null;
             }
 

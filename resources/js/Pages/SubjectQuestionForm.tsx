@@ -657,9 +657,12 @@ export default function SubjectQuestionForm() {
             };
             
             // Only include shortAnswer for short-answer type questions
-            // Don't include it at all for other types to avoid validation errors
-            if (question.type === 'short-answer' && question.shortAnswer) {
-                quizData.shortAnswer = question.shortAnswer;
+            // Ensure it's always a string, not null or undefined, to avoid validation errors
+            if (question.type === 'short-answer') {
+                // Ensure shortAnswer is always a string (empty string if not provided)
+                quizData.shortAnswer = (question.shortAnswer && typeof question.shortAnswer === 'string') 
+                    ? question.shortAnswer.trim() 
+                    : '';
             }
             
             quizes_questions.push(quizData)

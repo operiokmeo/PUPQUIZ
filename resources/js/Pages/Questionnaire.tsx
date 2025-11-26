@@ -380,6 +380,7 @@ const Questionnaire = () => {
     }
   }
   const sumbmitAlert = (questionType?: string) => {
+    // Fix: Ensure alert can be closed properly
     const type = questionType || currentQuestion?.['type'] || '';
     
     let message = 'Your answer has been submitted successfully.';
@@ -399,15 +400,15 @@ const Questionnaire = () => {
       title: 'Answer Submitted!',
       html: `
         <div style="text-align: left;">
-          <p style="margin-bottom: 0.5rem;">${message}</p>
-          ${reviewMessage ? `<p style="font-size: 0.875rem; color: #6b7280;">${reviewMessage}</p>` : ''}
+          <div style="margin-bottom: 0.5rem;">${message}</div>
+          ${reviewMessage ? `<div style="font-size: 0.875rem; color: #6b7280;">${reviewMessage}</div>` : ''}
         </div>
       `,
       confirmButtonColor: '#f97316',
       confirmButtonText: 'OK',
-      allowOutsideClick: false,
+      allowOutsideClick: true,
       allowEscapeKey: true,
-      focusConfirm: false,
+      focusConfirm: true,
       didClose: () => {
         // Ensure focus is returned properly when dialog closes
         if (document.activeElement && document.activeElement instanceof HTMLElement) {
@@ -1253,12 +1254,12 @@ const Questionnaire = () => {
               </DialogTitle>
               <DialogDescription className="mt-6">
                 <div className="flex items-center gap-x-3 mb-4 bg-white/80 p-4 rounded-xl border border-orange-100 shadow-sm">
-                  <p className="text-orange-700 font-medium">Question:</p>
-                  <p className="text-orange-900 uppercase">{currentQuestion ? currentQuestion['question'] : ""} ?</p>
+                  <div className="text-orange-700 font-medium">Question:</div>
+                  <div className="text-orange-900 uppercase">{currentQuestion ? currentQuestion['question'] : ""} ?</div>
                 </div>
                 <div className="flex items-center gap-x-3 mb-4 bg-white/80 p-4 rounded-xl border border-orange-100 shadow-sm">
-                  <p className="text-orange-700 font-medium">Answer:</p>
-                  <p className="text-orange-900">{currentQuestion ? currentQuestion['shortAnswer'] : ""}</p>
+                  <div className="text-orange-700 font-medium">Answer:</div>
+                  <div className="text-orange-900">{currentQuestion ? currentQuestion['shortAnswer'] : ""}</div>
                 </div>
                 <Table className="border-separate border-spacing-y-3 w-fit" >
                   <TableHeader>
@@ -1338,12 +1339,12 @@ const Questionnaire = () => {
                 </DialogTitle>
                 <DialogDescription className="mt-6 flex flex-col gap-3">
                   <div className="flex items-center gap-x-3 bg-white/80 p-4 rounded-xl border border-orange-100 shadow-sm">
-                    <p className="text-orange-700 font-medium">Question:</p>
-                    <p className="text-orange-900 uppercase">{currentQuestion ? currentQuestion['question'] : ""} ?</p>
+                    <div className="text-orange-700 font-medium">Question:</div>
+                    <div className="text-orange-900 uppercase">{currentQuestion ? currentQuestion['question'] : ""} ?</div>
                   </div>
                   <div className="flex items-center gap-x-3 bg-white/80 p-4 rounded-xl border border-orange-100 shadow-sm">
-                    <p className="text-orange-700 font-medium">Answer:</p>
-                    <p className="text-orange-900">{currentQuestion ? currentQuestion['shortAnswer'] : ""}</p>
+                    <div className="text-orange-700 font-medium">Answer:</div>
+                    <div className="text-orange-900">{currentQuestion ? currentQuestion['shortAnswer'] : ""}</div>
                   </div>
 
                   <div className="relative z-10 mt-12">
@@ -1478,6 +1479,7 @@ const Questionnaire = () => {
         {/* Answer Options */}
 
         {
+<<<<<<< HEAD
   (
     // Show options when conditions are met OR always for organizers
     (state == "options-revealed" ||
@@ -1491,6 +1493,15 @@ const Questionnaire = () => {
     (currentQuestion && (currentQuestion["type"] == "true-false" || currentQuestion["type"] == "short-answer"))
   ) ? (
     <div className="grid grid-cols-2 gap-6 mt-6 justify-center relative w-full">
+=======
+          // Show options for participants when conditions are met, OR always show for organizers
+          // Organizers should always see options regardless of state
+          // Also show for true/false and short-answer questions
+          (auth.user && currentQuestion && (currentQuestion["options"] || currentQuestion["type"] == "true-false" || currentQuestion["type"] == "short-answer")) || 
+           (!auth.user && (state == "options-revealed" || state == "timer-started" || (state == "answer-revealed" && selectedOption != null) || (options_revealed == 1 && state != "answer-revealed" && selectedOption != null))) ||
+           (currentQuestion && (currentQuestion["type"] == "true-false" || currentQuestion["type"] == "short-answer"))) ?
+            <div className="grid grid-cols-2 gap-6 mt-6 justify-center relative w-full">
+>>>>>>> upstream/main
 
       {currentQuestion && (() => {
         // TRUE/FALSE
