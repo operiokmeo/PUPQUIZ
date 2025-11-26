@@ -29,7 +29,7 @@ const Home = (props: Props) => {
     useEffect(() => {
         const timeout = setTimeout(() => {
             setIsLoading(false);
-        }, 10000);
+        }, 5000);
 
         return () => clearTimeout(timeout);
     }, []);
