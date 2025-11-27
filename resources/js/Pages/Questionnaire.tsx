@@ -1479,7 +1479,6 @@ const Questionnaire = () => {
         {/* Answer Options */}
 
         {
-<<<<<<< HEAD
   (
     // Show options when conditions are met OR always for organizers
     (state == "options-revealed" ||
@@ -1493,15 +1492,6 @@ const Questionnaire = () => {
     (currentQuestion && (currentQuestion["type"] == "true-false" || currentQuestion["type"] == "short-answer"))
   ) ? (
     <div className="grid grid-cols-2 gap-6 mt-6 justify-center relative w-full">
-=======
-          // Show options for participants when conditions are met, OR always show for organizers
-          // Organizers should always see options regardless of state
-          // Also show for true/false and short-answer questions
-          (auth.user && currentQuestion && (currentQuestion["options"] || currentQuestion["type"] == "true-false" || currentQuestion["type"] == "short-answer")) || 
-           (!auth.user && (state == "options-revealed" || state == "timer-started" || (state == "answer-revealed" && selectedOption != null) || (options_revealed == 1 && state != "answer-revealed" && selectedOption != null))) ||
-           (currentQuestion && (currentQuestion["type"] == "true-false" || currentQuestion["type"] == "short-answer"))) ?
-            <div className="grid grid-cols-2 gap-6 mt-6 justify-center relative w-full">
->>>>>>> upstream/main
 
       {currentQuestion && (() => {
         // TRUE/FALSE

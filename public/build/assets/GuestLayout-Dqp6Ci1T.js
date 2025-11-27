@@ -1,1 +1,0 @@
-import{j as e}from"./app-DWT7hB3X.js";function m({children:s}){return e.jsx("div",{className:"min-h-screen  flex flex-col sm:justify-center items-center pt-6 sm:pt-0",children:e.jsx("div",{className:"w-full sm:max-w-md mt-6",children:s})})}export{m as G};

@@ -1,1 +1,0 @@
-import{j as o}from"./app-DWT7hB3X.js";const r=s=>o.jsx("div",{className:"fixed bottom-0 left-0 right-0 w-full ",children:o.jsx("img",{src:"/images/icons/footer.png",alt:"footer",className:"w-full h-auto -z-30"})});export{r as F};
