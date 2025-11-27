@@ -252,7 +252,7 @@ function ManagePreRegistration({ }: Props) {
 
             <div className="min-h-screen bg-white p-6">
 
-                <div className="max-w-7xl mx-auto">
+                <div className="w-full max-w-full flex flex-col">
                     {/* Header */}
                     <div className='flex items-center justify-between'>
 
