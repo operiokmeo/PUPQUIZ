@@ -40,22 +40,27 @@ class LoginLogsController extends Controller
                     "exist" => false
                 ]);
             }
-            
-            // User can use regular login only if:
-            // 1. They have logged in before (exist in login_logs)
-            // 2. AND their email is verified
-            if ($loginLog && $user->hasVerifiedEmail()) {
+
+            $isVerified = !is_null($user->email_verified_at);
+
+            if ($isVerified) {
+                // Ensure we keep a login log entry once the user has been verified
+                if (!$loginLog) {
+                    LoginLogs::create([
+                        'user_id' => $user->id,
+                        'email' => $user->email,
+                    ]);
+                }
+
                 return response()->json([
                     "exist" => true
                 ]);
-            } else {
-                // Use OTP login if:
-                // - User hasn't logged in before, OR
-                // - User's email is not verified
-                return response()->json([
-                    "exist" => false
-                ]);
             }
+
+            // Use OTP login if the user still isn't verified
+            return response()->json([
+                "exist" => false
+            ]);
         } catch (\Exception $e) {
             // Log the error for debugging
             Log::error('Error in isFirstLogin: ' . $e->getMessage(), [
