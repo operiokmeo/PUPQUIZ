@@ -437,7 +437,7 @@ export default function ManagePreRegistration({}: Props) {
                       <th className="px-6 py-4 text-left text-sm font-semibold text-white w-fit truncate">Contact Number</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-white w-fit truncate">Members</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-white w-fit truncate">View Preview</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-white w-fit truncate">Action</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-white">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -506,7 +506,7 @@ export default function ManagePreRegistration({}: Props) {
                             <td className="px-6 py-4 text-center">
                               <Button
                                 size="sm"
-                                className="bg-green-600 hover:bg-green-800"
+                                className="bg-green-600 hover:bg-green-800 flex items-center gap-2"
                                 onClick={() => {
                                   try {
                                     handleViewFiles(session);
@@ -525,15 +525,25 @@ export default function ManagePreRegistration({}: Props) {
                                 <span>View</span>
                               </Button>
                             </td>
-                            <td className="px-6 py-4 text-center flex justify-between">
-                              <Button size="sm" className="bg-blue-600 hover:bg-blue-800" onClick={() => handleManage('Approved', session.id)}>
-                                <FileCheck2 className="w-4 h-4 text-white" />
-                                <span>Approved</span>
-                              </Button>
-                              <Button size="sm" className="bg-red-600 hover:bg-red-800" onClick={() => handleManage('Reject', session.id)}>
-                                <Ban className="w-4 h-4 text-white" />
-                                <span>Reject</span>
-                              </Button>
+                            <td className="px-6 py-4 text-center">
+                              <div className= "flex flex-col md:flex-row justify-center items-center gap-2">
+                                <Button
+                                    size="sm" className="bg-blue-600 hover:bg-blue-800 w-32 flex items-center justify-center gap-2"
+                                    onClick={() => handleManage('Approved', session.id)}
+                                >
+                                    <FileCheck2 className="w-4 h-4 text-white"/>
+                                    <span>Approved</span>
+                                </Button>
+
+                                <Button
+                                    size="sm"
+                                    className="bg-red-600 hover:bg-red-800 w-32 flex items-center justify-center gap-2"
+                                    onClick={() => handleManage('Reject', session.id)}
+                                >
+                                    <Ban className="w-4 h-4 text-white"/>
+                                    <span>Reject</span>
+                                </Button>
+                              </div>
                             </td>
                           </tr>
 
