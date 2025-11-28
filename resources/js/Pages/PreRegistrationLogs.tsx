@@ -351,9 +351,9 @@ const PreRegistrationLogs = (props: Props) => {
           <div className='flex justify-between items-center'>
             <div className="mb-8">
               <h1 className="text-4xl font-bold text-gray-900 mb-2 bg-gradient-to-r from-red-600 to-amber-600 bg-clip-text text-transparent">
-                Pre Registration Logs
+                Pre-Registration Logs
               </h1>
-              <p className="text-gray-600">Monitor and track Pre Registration activity</p>
+              <p className="text-gray-600">Monitor and track Pre-Registration activity</p>
             </div>
             <div onClick={() => router.get("/organizerLobby")} className='bg-red-500 text-white p-4 flex gap-x-3 rounded-md hover:bg-red-700 hover:cursor-pointer'>
               <LayoutDashboardIcon />
@@ -489,7 +489,7 @@ const PreRegistrationLogs = (props: Props) => {
               {/* Session Table */}
               <div className="bg-white rounded-xl shadow-lg border border-gray-300 p-6 overflow-hidden">
                 <div className="p-4 border-b border-gray-500 flex items-center gap-2">
-                  <h3 className="text-lg font-semibold text-gray-900">Pre Registration Logs</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">Pre-Registration Logs</h3>
                   {selectedLobby && (
                     <span className="text-sm text-gray-600">- {availableLobbies.find(l => l.id === selectedLobby)?.name || ''}</span>
                   )}

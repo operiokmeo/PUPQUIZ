@@ -200,7 +200,7 @@ const QuizStatisticsDashboard = () => {
   return (
     <AuthenticatedLayout>
       <div className="min-h-screen bg-white p-6">
-        <div className="max-w-7xl mx-auto w-full">
+        <div className="w-full max-w-full flex flex-col">
           <div className="flex gap-6">
             {/* Left Sidebar - Quiz Event Filter */}
             <div className="w-80 flex-shrink-0">

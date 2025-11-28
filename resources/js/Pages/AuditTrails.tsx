@@ -92,6 +92,7 @@ const AuditTrails = (props: Props) => {
         return grouped;
     }, [allLogs, lobbies]);
 
+
     // Filter logs
     const filteredLogsByLobby = useMemo(() => {
         const filtered: { [key: number]: { lobby: any; logs: AuditLog[] } } = {};
@@ -252,7 +253,7 @@ const AuditTrails = (props: Props) => {
     return (
         <AuthenticatedLayout>
             <div className="min-h-screen bg-white p-6">
-                <div className="max-w-7xl mx-auto">
+                <div className="max-w-[90rem] mx-auto">
                     {/* Header */}
                     <div className='flex justify-between items-center mb-8'>
                         <div>
@@ -423,6 +424,7 @@ const AuditTrails = (props: Props) => {
                             </p>
                         </div>
                     </div>
+                    
 
                     {/* Logs by Lobby - Collapsible Sections */}
                     <div className="space-y-4">
@@ -472,7 +474,6 @@ const AuditTrails = (props: Props) => {
                                                             <tr>
                                                                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Type</th>
                                                                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">User</th>
-                                                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Action</th>
                                                                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Description</th>
                                                                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">IP Address</th>
                                                                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Timestamp</th>

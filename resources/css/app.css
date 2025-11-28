@@ -58,6 +58,10 @@
   }
 }
 
+html, body {
+  @apply font-poppins;
+}
+
 @layer base {
   * {
     @apply border-border;

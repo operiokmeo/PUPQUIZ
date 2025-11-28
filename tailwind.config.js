@@ -14,10 +14,7 @@ export default {
     theme: {
     	extend: {
     		fontFamily: {
-    			sans: [
-    				'Figtree',
-                    ...defaultTheme.fontFamily.sans
-                ]
+    			poppins: ["Poppins", "sans-serif"]
     		},
     		borderRadius: {
     			lg: 'var(--radius)',

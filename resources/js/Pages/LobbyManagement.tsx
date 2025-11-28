@@ -167,7 +167,7 @@ const LobbyManagement = (props: Props) => {
   return (
     <AuthenticatedLayout>
       <div className="min-h-screen bg-white p-6">
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full max-w-full flex flex-col">
           {/* Header */}
           <div className='flex justify-between items-center'>
             <div className="mb-8">

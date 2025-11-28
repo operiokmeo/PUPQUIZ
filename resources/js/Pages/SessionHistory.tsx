@@ -5,9 +5,18 @@ import { Link, router, usePage } from '@inertiajs/react';
 import { PageProps } from '@/types';
 type Props = {}
 
+type SessionLog = {
+  id: number;
+  user_id: number;
+  user_name?: string;
+  ip_address: string;
+  created_at: string;
+  logout_timestamp?: string | null;
+};
+
 const SessionHistory = (props: Props) => {
 
-  const { logs } = usePage().props
+  const { logs } = usePage<{ logs: SessionLog[] }>().props;
   const { auth } = usePage<PageProps>().props
   const [searchTerm, setSearchTerm] = useState('');
   const [filterActive, setFilterActive] = useState('all');
@@ -31,7 +40,7 @@ const SessionHistory = (props: Props) => {
     if (!logout) return 'Active';
     const start = new Date(created);
     const end = new Date(logout);
-    const diff = Math.abs(end - start);
+    const diff = Math.abs(end.getTime() - start.getTime());
     const minutes = Math.floor(diff / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
     return `${minutes}m ${seconds}s`;

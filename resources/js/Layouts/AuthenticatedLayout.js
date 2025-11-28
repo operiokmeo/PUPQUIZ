@@ -75,11 +75,11 @@ export default function Authenticated({ header, children, }) {
                             className: "text-red-600",
                             children: "All Audit Trails",
                           }),
-                          _jsx(ResponsiveNavLink, {
-                            href: "/session-history",
-                            className: "text-red-600",
-                            children: "Session History",
-                          }),
+                          // _jsx(ResponsiveNavLink, {
+                          //   href: "/session-history",
+                          //   className: "text-red-600",
+                          //   children: "Session History",
+                          // }),
                           user?.role === 3 && _jsx(ResponsiveNavLink, {
                             href: "/lobby-management",
                             className: "text-red-600",

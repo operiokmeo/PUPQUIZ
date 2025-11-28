@@ -60,7 +60,7 @@ const CountdownTimer = ({ startDate }: { startDate: string | Date }) => {
     if (start <= now) return null;
 
     return (
-        <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-3 border border-orange-200">
+        <div className="bg-gradient-to-r from-yellow-100 to-red-50 rounded-lg p-3 border border-orange-200">
             <div className="flex items-center gap-2 mb-2">
                 <Clock className="w-4 h-4 text-orange-600" />
                 <p className="text-xs font-semibold text-orange-700">Starts in:</p>
@@ -73,16 +73,22 @@ const CountdownTimer = ({ startDate }: { startDate: string | Date }) => {
                     </div>
                 )}
                 <div className="text-center">
+                        <div className="text-lg font-bold text-orange-700">{timeLeft.days} </div>
+                        <div className="text-xs text-orange-600">
+                            {timeLeft.days === 0 ? "day" : "days"}
+                        </div>
+                    </div>
+                <div className="text-center">
                     <div className="text-lg font-bold text-orange-700">{String(timeLeft.hours).padStart(2, '0')}</div>
-                    <div className="text-xs text-orange-600">h</div>
+                    <div className="text-xs text-orange-600">hours</div>
                 </div>
                 <div className="text-center">
-                    <div className="text-lg font-bold text-orange-700">{String(timeLeft.minutes).padStart(2, '0')}</div>
-                    <div className="text-xs text-orange-600">m</div>
+                    <div className="text-lg font-bold text-orange-700">: {String(timeLeft.minutes).padStart(2, '0')}</div>
+                    <div className="text-xs text-orange-600">mins</div>
                 </div>
                 <div className="text-center">
-                    <div className="text-lg font-bold text-orange-700">{String(timeLeft.seconds).padStart(2, '0')}</div>
-                    <div className="text-xs text-orange-600">s</div>
+                    <div className="text-lg font-bold text-orange-700">: {String(timeLeft.seconds).padStart(2, '0')}</div>
+                    <div className="text-xs text-orange-600">secs</div>
                 </div>
             </div>
         </div>
@@ -279,7 +285,16 @@ const OrganizerLobby = (props: Props) => {
 
 
                     <div className='col-span-5 space-y-6'>
-                        <h1 className="text-3xl font-bold text-red-800 tracking-tight">Event Rooms</h1>
+                        <div className="mb-8">
+                            <h1 className="text-4xl font-bold bg-gradient-to-r from-red-600 to-amber-600 bg-clip-text text-transparent mb-0">
+                                Event Rooms
+                            </h1>
+                            <p className="text-gray-500">Manage and create event rooms for your quizzes</p>
+                        </div>
+                        
+                        {/* Horizontal line */}
+                        <hr className="mt-4 border-t-2 border-gray-300" />
+                        
                         <div className="flex justify-end">
                             {/* <Dialog>
                             <DialogTrigger asChild>
@@ -328,6 +343,7 @@ const OrganizerLobby = (props: Props) => {
                                 </form>
                             </DialogContent>
                         </Dialog> */}
+                        
                             {/* Only show Add Lobby button when there are existing lobbies */}
                             {availableLobbies && availableLobbies.length > 0 && (
                                 <div className="flex justify-end">
@@ -407,6 +423,7 @@ const OrganizerLobby = (props: Props) => {
                             )}
 
                         </div>
+
                         <div className="space-y-4">
                             {addLobby ? (
                                 <Card className="bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl border border-red-200">
@@ -438,10 +455,14 @@ const OrganizerLobby = (props: Props) => {
                                         >
                                             <CardHeader className="pb-3">
                                                 <div className="flex justify-between items-start">
-                                                    <CardTitle className="text-xl uppercase font-bold text-red-800 truncate pr-2">
-                                                        {al.name}
-                                                    </CardTitle>
-                                                    <div className="flex space-x-1 flex-shrink-0">
+                                                    {/* LEFT SIDE (LOBBY NAME + STATUS) */}
+                                                    <div className="flex justify-between items-start">
+                                                        <CardTitle className="text-2xl uppercase font-extrabold text-red-800 truncate">
+                                                            {al.name}
+                                                        </CardTitle>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-1">
                                                         {/* Pre-Registration Button */}
                                                         <button
                                                             onClick={(e) => {
@@ -450,39 +471,14 @@ const OrganizerLobby = (props: Props) => {
                                                                 // Add pre-registration functionality
                                                                 // handlePreRegistration(al.id);
                                                             }}
-                                                            className="p-2 rounded-lg bg-green-100 hover:bg-green-200 text-green-600 transition-colors duration-200"
+                                                            className="p-2 rounded-lg bg-[#FFE252] hover:bg-[#FBEB8A] text-yellow-900 transition-colors duration-200 flex items-center gap-2"
                                                             title="Pre-registration"
                                                         >
                                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                                                             </svg>
-                                                        </button>
-
-                                                        {/* Copy Code Button */}
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                navigator.clipboard.writeText(al.lobby_code);
-                                                                Swal.fire({
-                                                                    toast: true,
-                                                                    position: 'top-end',
-                                                                    icon: 'success',
-                                                                    title: 'Copied to clipboard',
-                                                                    showConfirmButton: false,
-                                                                    timer: 3000,
-                                                                    timerProgressBar: true,
-                                                                    background: '#fff',
-                                                                    color: '#399918',
-                                                                    iconColor: '#399918 ',
-                                                                });
-                                                                // You can add toast notification here
-                                                            }}
-                                                            className="p-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 transition-colors duration-200"
-                                                            title="Copy lobby code"
-                                                        >
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                            </svg>
+                                                            
+                                                            <span className="text-xs font-semibold">Pre-Registration Lists</span>
                                                         </button>
 
                                                         {/* Edit Button */}
@@ -492,7 +488,7 @@ const OrganizerLobby = (props: Props) => {
                                                                 // Add edit functionality
                                                                 handleEditClick(al)
                                                             }}
-                                                            className="p-2 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-600 transition-colors duration-200"
+                                                            className="p-2 rounded-lg bg-blue-800 text-white hover:bg-blue-200 hover:text-blue-600 transition-colors duration-200"
                                                             title="Edit lobby"
                                                         >
                                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -509,7 +505,7 @@ const OrganizerLobby = (props: Props) => {
                                                                 handleDelete(al.id)
 
                                                             }}
-                                                            className="p-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 transition-colors duration-200"
+                                                            className="p-2 rounded-lg bg-red-600 text-white hover:bg-red-200 hover:text-red-600 transition-colors duration-200"
                                                             title="Delete lobby"
                                                         >
                                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -525,15 +521,39 @@ const OrganizerLobby = (props: Props) => {
                                                 onClick={() => handleClickCategory(al.lobby_code)}
                                             >
                                                 {/* Lobby Code */}
-                                                <div className="flex justify-between items-center">
+                                                <div className="flex items-center gap-2">
                                                     <div>
                                                         <p className="text-sm text-red-500 font-medium">Lobby Code </p>
                                                         <p className="text-lg font-bold text-red-700 font-mono tracking-wide">{al.lobby_code}</p>
                                                     </div>
-                                                    <div className="bg-red-100 px-3 py-1 rounded-full">
-                                                        <span className="text-xs font-semibold text-red-600">ACTIVE</span>
-                                                    </div>
+                                                    {/* Copy Code Button */}
+                                                    <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                navigator.clipboard.writeText(al.lobby_code);
+                                                                Swal.fire({
+                                                                    toast: true,
+                                                                    position: 'top-right',
+                                                                    icon: 'success',
+                                                                    title: 'Copied to clipboard',
+                                                                    showConfirmButton: false,
+                                                                    timer: 3000,
+                                                                    timerProgressBar: true,
+                                                                    background: '#fff',
+                                                                    color: '#399918',
+                                                                    iconColor: '#399918 ',
+                                                                });
+                                                                // You can add toast notification here
+                                                            }}
+                                                            className="p-2 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-600 transition-colors duration-200"
+                                                            title="Copy lobby code"
+                                                        >
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                            </svg>
+                                                        </button>
                                                 </div>
+
 
                                                 {/* Scheduled Date */}
                                                 <div>
@@ -546,7 +566,11 @@ const OrganizerLobby = (props: Props) => {
                                                             const displayDate = subjectWithStartDate?.start_date || al.start_date;
                                                             return displayDate ? 'Scheduled' : 'Created';
                                                         })()}
+
                                                     </p>
+
+                                                    
+
                                                     <p className="text-sm font-semibold text-gray-700">
                                                         {(() => {
                                                             // Use subject start_date if available, otherwise use lobby start_date
@@ -592,8 +616,39 @@ const OrganizerLobby = (props: Props) => {
                                                                 })() : 'Just now';
                                                             }
                                                         })()}
+
+                                                        
                                                     </p>
                                                 </div>
+
+                                                {/* STATUS BADGE */}
+                                                {(() => {
+                                                            // Extract scheduled date (subject start_date or lobby start_date)
+                                                            const subjects = al.subjects || [];
+                                                            const subjectWithStartDate = subjects.find((s) => s.start_date);
+                                                            const displayDate = subjectWithStartDate?.start_date || al.start_date;
+
+                                                            // NOW
+                                                            const now = new Date();
+
+                                                            let scheduledDate = null;
+                                                            if (displayDate) {
+                                                                scheduledDate = new Date(displayDate.replace(" ", "T"));
+                                                            }
+
+                                                            const isActive = scheduledDate && scheduledDate >= now;
+
+                                                            return (
+                                                                <span
+                                                                    className={`px-3 py-1 text-1XL font-bold flex items-center justify-center
+                                                                        ${isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}
+                                                                    `}
+                                                                >
+                                                                    {isActive ? "ACTIVE" : "NOT ACTIVE"}
+                                                                </span>
+
+                                                            );
+                                                        })()}    
 
                                                 {/* Countdown Timer */}
                                                 {(() => {
@@ -613,6 +668,8 @@ const OrganizerLobby = (props: Props) => {
                                                         }
                                                     }
                                                     return null;
+
+                                                    
                                                 })()}
 
                                                 {/* Participants */}
