@@ -279,16 +279,18 @@ const PreRegistrationLogs = (props: Props) => {
     `;
 
     // Build members HTML using membersArray (each member gets own info box + their files)
-    const membersHTML = membersArray.map((member: any) => {
+    const membersHTML = membersArray.map((member: any, index) => {
       const name = member.name || 'N/A';
       const studentNo = member.studentNumber || member.student_number || 'N/A';
       const courseYear = member.courseYear || member.course_year || 'N/A';
       // get grouped files for this member (matching by member name)
       const memberFiles = grouped[name] || [];
 
+      const memberNumber = index + 1;
+
       return `
         <div class="p-4 border-2 rounded-lg bg-orange-50 mb-4">
-          <h2 class="text-2xl font-bold text-orange-600 mb-3">Member Information</h2>
+          <h2 class="text-2xl font-bold text-orange-600 mb-3">Member No. ${memberNumber} Information</h2>
           <p class="text-black"><strong>Full Name:</strong> ${name}</p>
           <p class="mt-1 text-black"><strong>Student ID:</strong> ${studentNo}</p>
           <p class="mt-1 text-black"><strong>Section:</strong> ${courseYear}</p>
