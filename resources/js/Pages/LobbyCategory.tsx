@@ -9,6 +9,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
+import { formatManilaDate, parseManilaDate, getManilaTimeNow } from '@/lib/utils';
 
 import { Calendar } from "@/Components/ui/calendar"
 export default function LobbyCategory() {
@@ -25,32 +26,15 @@ export default function LobbyCategory() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [dialogOpenEmpty, setDialogOpenEmpty] = useState(false)
   const [isFirstSubject, setIsFirstSubject] = useState(false)
-  const [currentTime, setCurrentTime] = useState<Date>(new Date())
+  const [currentTime, setCurrentTime] = useState<Date>(getManilaTimeNow())
   useEffect(() => {
-    // Update more frequently to ensure consistent status checks
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    // Update more frequently to ensure consistent status checks in Manila timezone
+    const timer = setInterval(() => setCurrentTime(getManilaTimeNow()), 1000);
     return () => clearInterval(timer);
   }, []);
 
   const formatDateLabel = (dateString?: string | null) => {
-    if (!dateString) return 'No schedule set';
-    // Parse the date string - handle both ISO format and 'Y-m-d H:i:s' format
-    let date: Date;
-    if (dateString instanceof Date) {
-      date = dateString;
-    } else {
-      // If it's in 'Y-m-d H:i:s' format (from backend), treat it as local time
-      // Replace space with 'T' to make it ISO-like, but don't add 'Z' to keep it as local time
-      const normalizedDate = dateString.includes('T') ? dateString : dateString.replace(' ', 'T');
-      date = new Date(normalizedDate);
-    }
-    
-    // Check if date is valid
-    if (isNaN(date.getTime())) {
-      return 'Invalid date';
-    }
-    
-    return date.toLocaleString(undefined, {
+    return formatManilaDate(dateString, {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
@@ -170,24 +154,13 @@ export default function LobbyCategory() {
                     {(() => {
                       // Use subject start_date as primary source (consistent with backend logic)
                       const startDate: string | null = subject.start_date ?? subject.startDate ?? null;
-                      let parsedStart: Date | null = null;
+                      const parsedStart = startDate ? parseManilaDate(startDate) : null;
                       
-                      if (startDate) {
-                        // Parse the date string - handle both ISO format and 'Y-m-d H:i:s' format
-                        // If it's in 'Y-m-d H:i:s' format, replace space with 'T' to make it parseable
-                        // Don't add 'Z' to keep it as local time (consistent with backend timezone handling)
-                        const normalizedDate = startDate.includes('T') ? startDate : startDate.replace(' ', 'T');
-                        parsedStart = new Date(normalizedDate);
-                        
-                        // Validate the parsed date
-                        if (isNaN(parsedStart.getTime())) {
-                          parsedStart = null;
-                        }
-                      }
-                      
-                      // Use consistent time comparison - allow proceed if no start date or if current time >= start time
+                      // Use consistent time comparison in Manila timezone
+                      // Allow proceed if no start date or if current Manila time >= start time
                       // Add a small buffer (1 second) to account for any timing discrepancies
-                      const canProceed = !parsedStart || (parsedStart.getTime() - 1000) <= currentTime.getTime();
+                      const manilaNow = getManilaTimeNow();
+                      const canProceed = !parsedStart || (parsedStart.getTime() - 1000) <= manilaNow.getTime();
                       return (
                         <button
                           type="button"
@@ -220,9 +193,9 @@ export default function LobbyCategory() {
                     {(() => {
                       const startDate: string | null = subject.start_date ?? subject.startDate ?? null;
                       if (startDate) {
-                        const normalizedDate = startDate.includes('T') ? startDate : startDate.replace(' ', 'T');
-                        const parsedStart = new Date(normalizedDate);
-                        if (!isNaN(parsedStart.getTime()) && parsedStart.getTime() > currentTime.getTime()) {
+                        const parsedStart = parseManilaDate(startDate);
+                        const manilaNow = getManilaTimeNow();
+                        if (parsedStart && parsedStart.getTime() > manilaNow.getTime()) {
                           return <p className='text-amber-600 font-medium'>Participants can join once the scheduled time arrives.</p>;
                         }
                       }

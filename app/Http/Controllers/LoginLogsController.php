@@ -28,36 +28,18 @@ class LoginLogsController extends Controller
                 ], 200);
             }
 
-            // Check if user has logged in before
+            // Check if user has logged in before by checking login_logs table
+            // If a login log exists, it means the user has successfully completed OTP verification before
             $loginLog = LoginLogs::where('email', $request->input('email'))->first();
             
-            // Also check if the user's email is verified
-            $user = User::where('email', $request->input('email'))->first();
-            
-            // If user doesn't exist, return false (will use OTP login)
-            if (!$user) {
-                return response()->json([
-                    "exist" => false
-                ]);
-            }
-
-            $isVerified = !is_null($user->email_verified_at);
-
-            if ($isVerified) {
-                // Ensure we keep a login log entry once the user has been verified
-                if (!$loginLog) {
-                    LoginLogs::create([
-                        'user_id' => $user->id,
-                        'email' => $user->email,
-                    ]);
-                }
-
+            // If login log exists, user has logged in before (no OTP needed)
+            if ($loginLog) {
                 return response()->json([
                     "exist" => true
                 ]);
             }
 
-            // Use OTP login if the user still isn't verified
+            // No login log found - this is first-time login, OTP is required
             return response()->json([
                 "exist" => false
             ]);

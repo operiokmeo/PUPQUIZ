@@ -183,191 +183,187 @@ export default function EditModal(props: Props) {
 
     return (
         <Dialog open={show} onOpenChange={() => setShow(!show)}>
-            <DialogContent className="sm:max-w-[425px] min-w-[1000px] max-h-[90vh] overflow-hidden flex flex-col">
-                <DialogHeader className="flex-shrink-0">
+            <DialogContent className="sm:max-w-[425px] min-w-[1200px] max-w-[95vw] max-h-[90vh] overflow-hidden flex flex-col p-0">
+                <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4 border-b">
                     <DialogTitle>Edit Question</DialogTitle>
                     <DialogDescription>
-                        Make changes to question here. Click save when you&apos;re
-                        done.
+                        Make changes to question here. Click save when you&apos;re done.
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="flex-1 overflow-y-auto pr-2">
-                    <div className="max-w-4xl w-full mx-auto bg-white">
-                        <div className="bg-gray-50 p-4 rounded-b-lg border">
-                        {/* Basic Information */}
-
-
-                        {/* Question */}
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Question
-                            </label>
-                            <textarea
-                                value={formData.question}
-                                onChange={(e) => {
-                                    const value = e.target.value.replace(/\?/g, ''); // remove all "?"
-                                    handleInputChange('question', value)
-                                }}
-                                rows={2}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Enter your question here..."
-                            />
-                        </div>
-
-                        {/* Settings Row */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Difficulty
+                {/* 2-Panel Layout: Form on Left, Preview on Right */}
+                <div className="flex-1 flex overflow-hidden">
+                    {/* Left Panel: Form Fields */}
+                    <div className="flex-1 overflow-y-auto px-6 py-4 border-r bg-gray-50">
+                        <div className="max-w-full">
+                            {/* Question */}
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Question
                                 </label>
-                                <select
-                                    value={formData.difficulty}
-                                    onChange={(e) => handleInputChange('difficulty', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                >
-                                    <option value="easy">Easy</option>
-                                    <option value="average">Average</option>
-                                    <option value="hard">Hard</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Points
-                                </label>
-                                <input
-                                    type="number"
-                                    value={formData.points}
-                                    onChange={(e) => handleInputChange('points', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                <textarea
+                                    value={formData.question}
+                                    onChange={(e) => {
+                                        const value = e.target.value.replace(/\?/g, ''); // remove all "?"
+                                        handleInputChange('question', value)
+                                    }}
+                                    rows={2}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                    placeholder="Enter your question here..."
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    <Clock className="inline w-4 h-4 mr-1" />
-                                    Time Limit (seconds)
-                                </label>
-                                <input
-                                    type="number"
-                                    value={formData.timeLimit}
-                                    onChange={(e) => handleInputChange('timeLimit', e.target.value)}
-                                    min="1"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Options Section */}
-                        {formData.type === 'multiple-choice' && (
-                            <div className="mb-4">
-                                <div className="flex justify-between items-center mb-2">
-                                    <h3 className="text-base font-medium text-gray-900">Answer Options</h3>
-                                    <button
-                                        onClick={addOption}
-                                        className="flex items-center px-2 py-1.5 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors text-sm"
-                                    >
-                                        <Plus className="w-3 h-3 mr-1" />
-                                        Add Option
-                                    </button>
-                                </div>
-
-                                <div className="space-y-2">
-                                    {formData.options.map((option, index) => (
-                                        <div key={index} className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg bg-white">
-                                            <div className="flex items-center">
-                                                <input
-                                                    type="radio"
-                                                    name="correctAnswer"
-                                                    checked={option.isCorrect}
-                                                    onChange={() => setCorrectAnswer(index)}
-                                                    className="w-4 h-4 text-orange-600 focus:ring-orange-500"
-                                                />
-                                                <span className="ml-1 text-xs text-gray-600">Correct</span>
-                                            </div>
-
-                                            <input
-                                                type="text"
-                                                value={option.text}
-                                                onChange={(e) => handleOptionChange(index, 'text', e.target.value)}
-                                                placeholder={`Option ${index + 1}`}
-                                                className="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                            />
-
-                                            {formData.options.length > 2 && (
-                                                <button
-                                                    onClick={() => removeOption(index)}
-                                                    className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                                                >
-                                                    <Trash2 className="w-3.5 h-3.5" />
-                                                </button>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Short Answer Section */}
-                        {formData.type === 'short-answer' && (
-                            <div className="mb-4">
-                                <h3 className="text-base font-medium text-gray-900 mb-2">Correct Answer</h3>
-                                <div className="bg-white p-3 border border-gray-200 rounded-lg">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Expected Answer
+                            {/* Settings Row */}
+                            <div className="grid grid-cols-3 gap-3 mb-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Difficulty
                                     </label>
-                                    <textarea
-                                        value={formData.shortAnswer || ''}
-                                        onChange={(e) => handleInputChange('shortAnswer', e.target.value)}
-                                        rows={2}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                        placeholder="Enter the correct answer for this question..."
+                                    <select
+                                        value={formData.difficulty}
+                                        onChange={(e) => handleInputChange('difficulty', e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+                                    >
+                                        <option value="easy">Easy</option>
+                                        <option value="average">Average</option>
+                                        <option value="hard">Hard</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Points
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={formData.points}
+                                        onChange={(e) => handleInputChange('points', e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
                                     />
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        This will be used to evaluate student responses (case-insensitive matching)
-                                    </p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        <Clock className="inline w-4 h-4 mr-1" />
+                                        Time Limit (seconds)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={formData.timeLimit}
+                                        onChange={(e) => handleInputChange('timeLimit', e.target.value)}
+                                        min="1"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+                                    />
                                 </div>
                             </div>
-                        )}
 
-                        {/* True/False Section */}
-                        {formData.type === 'true-false' && (
-                            <div className="mb-4">
-                                <h3 className="text-base font-medium text-gray-900 mb-2">Correct Answer</h3>
-                                <div className="bg-white p-3 border border-gray-200 rounded-lg">
-                                    <div className="flex gap-4">
-                                        <label className="flex items-center">
-                                            <input
-                                                type="radio"
-                                                name="trueFalseAnswer"
-                                                value="1"
-                                                checked={formData.trueFalseAnswer == 1}
-                                                onChange={() => handleInputChange('trueFalseAnswer', true)}
-                                                className="w-4 h-4 text-orange-600 focus:ring-orange-500"
-                                            />
-                                            <span className="ml-2 text-sm font-medium text-gray-700">True</span>
-                                        </label>
-                                        <label className="flex items-center">
-                                            <input
-                                                type="radio"
-                                                name="trueFalseAnswer"
-                                                value="0"
-                                                checked={formData.trueFalseAnswer == 0}
-                                                onChange={() => handleInputChange('trueFalseAnswer', false)}
-                                                className="w-4 h-4 text-orange-600 focus:ring-orange-500"
-                                            />
-                                            <span className="ml-2 text-sm font-medium text-gray-700">False</span>
-                                        </label>
+                            {/* Options Section */}
+                            {formData.type === 'multiple-choice' && (
+                                <div className="mb-4">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h3 className="text-base font-medium text-gray-900">Answer Options</h3>
+                                        <button
+                                            onClick={addOption}
+                                            className="flex items-center px-2 py-1.5 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors text-sm"
+                                        >
+                                            <Plus className="w-3 h-3 mr-1" />
+                                            Add Option
+                                        </button>
+                                    </div>
+
+                                    <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+                                        {formData.options.map((option, index) => (
+                                            <div key={index} className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg bg-white">
+                                                <div className="flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        name="correctAnswer"
+                                                        checked={option.isCorrect}
+                                                        onChange={() => setCorrectAnswer(index)}
+                                                        className="w-4 h-4 text-orange-600 focus:ring-orange-500"
+                                                    />
+                                                    <span className="ml-1 text-xs text-gray-600">Correct</span>
+                                                </div>
+
+                                                <input
+                                                    type="text"
+                                                    value={option.text}
+                                                    onChange={(e) => handleOptionChange(index, 'text', e.target.value)}
+                                                    placeholder={`Option ${index + 1}`}
+                                                    className="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                                />
+
+                                                {formData.options.length > 2 && (
+                                                    <button
+                                                        onClick={() => removeOption(index)}
+                                                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
-                            </div>
-                        )}
-                        
-                        {/* Save Button and Preview in a row */}
-                        <div className="flex gap-4 items-start">
+                            )}
+
+                            {/* Short Answer Section */}
+                            {formData.type === 'short-answer' && (
+                                <div className="mb-4">
+                                    <h3 className="text-base font-medium text-gray-900 mb-2">Correct Answer</h3>
+                                    <div className="bg-white p-3 border border-gray-200 rounded-lg">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Expected Answer
+                                        </label>
+                                        <textarea
+                                            value={formData.shortAnswer || ''}
+                                            onChange={(e) => handleInputChange('shortAnswer', e.target.value)}
+                                            rows={3}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                            placeholder="Enter the correct answer for this question..."
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            This will be used to evaluate student responses (case-insensitive matching)
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* True/False Section */}
+                            {formData.type === 'true-false' && (
+                                <div className="mb-4">
+                                    <h3 className="text-base font-medium text-gray-900 mb-2">Correct Answer</h3>
+                                    <div className="bg-white p-3 border border-gray-200 rounded-lg">
+                                        <div className="flex gap-4">
+                                            <label className="flex items-center">
+                                                <input
+                                                    type="radio"
+                                                    name="trueFalseAnswer"
+                                                    value="1"
+                                                    checked={formData.trueFalseAnswer == 1}
+                                                    onChange={() => handleInputChange('trueFalseAnswer', true)}
+                                                    className="w-4 h-4 text-orange-600 focus:ring-orange-500"
+                                                />
+                                                <span className="ml-2 text-sm font-medium text-gray-700">True</span>
+                                            </label>
+                                            <label className="flex items-center">
+                                                <input
+                                                    type="radio"
+                                                    name="trueFalseAnswer"
+                                                    value="0"
+                                                    checked={formData.trueFalseAnswer == 0}
+                                                    onChange={() => handleInputChange('trueFalseAnswer', false)}
+                                                    className="w-4 h-4 text-orange-600 focus:ring-orange-500"
+                                                />
+                                                <span className="ml-2 text-sm font-medium text-gray-700">False</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            
                             {/* Save Button */}
-                            <div className="flex-1 flex justify-end">
+                            <div className="mt-4 flex justify-end">
                                 <button
                                     onClick={handleSave}
                                     className="flex items-center px-6 py-2.5 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors font-medium"
@@ -376,31 +372,79 @@ export default function EditModal(props: Props) {
                                     Save Question
                                 </button>
                             </div>
+                        </div>
+                    </div>
 
-                            {/* Preview - Compact */}
-                            {formData.type === 'multiple-choice' && (
-                                <div className="flex-1 p-3 bg-orange-50 rounded-lg">
-                                    <h4 className="font-medium text-gray-900 mb-1 text-sm">Preview:</h4>
-                                    <div className="text-xs text-gray-600">
-                                        <p><strong>Q{formData.id}:</strong> {formData.question}</p>
-                                        <p><strong>Difficulty:</strong> {formData.difficulty} | <strong>Time:</strong> {formData.timeLimit} sec | <strong>Points:</strong> {formData.points}</p>
-                                        {formData.options.length > 0 && (
-                                            <div className="mt-1">
-                                                <strong>Options:</strong>
-                                                <ul className="list-disc list-inside ml-3">
-                                                    {formData.options.map((option, index) => (
-                                                        <li key={index} className={option.isCorrect ? 'text-orange-600 font-medium' : ''}>
-                                                            {option.text} {option.isCorrect && '✓'}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        )}
+                    {/* Right Panel: Preview */}
+                    <div className="w-[400px] flex-shrink-0 overflow-y-auto px-6 py-4 bg-white">
+                        <div className="sticky top-0">
+                            <h4 className="font-semibold text-gray-900 mb-3 text-base border-b pb-2">Preview</h4>
+                            
+                            <div className="space-y-3">
+                                <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                                    <div className="text-sm text-gray-700 space-y-2">
+                                        <p className="font-semibold text-base">
+                                            <span className="text-orange-600">Q{formData.id}:</span> {formData.question || 'Enter question...'}
+                                        </p>
+                                        <div className="flex flex-wrap gap-2 text-xs">
+                                            <span className="px-2 py-1 bg-white rounded border">
+                                                <strong>Difficulty:</strong> {formData.difficulty || 'easy'}
+                                            </span>
+                                            <span className="px-2 py-1 bg-white rounded border">
+                                                <strong>Time:</strong> {formData.timeLimit || '0'} sec
+                                            </span>
+                                            <span className="px-2 py-1 bg-white rounded border">
+                                                <strong>Points:</strong> {formData.points || '0'}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                            )}
-                        </div>
 
+                                {formData.type === 'multiple-choice' && formData.options.length > 0 && (
+                                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                        <h5 className="font-medium text-sm text-gray-900 mb-2">Options:</h5>
+                                        <ul className="space-y-2">
+                                            {formData.options.map((option, index) => (
+                                                <li 
+                                                    key={index} 
+                                                    className={`p-2 rounded border ${
+                                                        option.isCorrect 
+                                                            ? 'bg-green-50 border-green-300 text-green-800' 
+                                                            : 'bg-white border-gray-200 text-gray-700'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        {option.isCorrect && (
+                                                            <span className="text-green-600 font-bold">✓</span>
+                                                        )}
+                                                        <span className={option.isCorrect ? 'font-medium' : ''}>
+                                                            {option.text || `Option ${index + 1}`}
+                                                        </span>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                {formData.type === 'short-answer' && (
+                                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                        <h5 className="font-medium text-sm text-gray-900 mb-2">Expected Answer:</h5>
+                                        <p className="text-sm text-gray-700 bg-white p-2 rounded border border-gray-200">
+                                            {formData.shortAnswer || 'Enter expected answer...'}
+                                        </p>
+                                    </div>
+                                )}
+
+                                {formData.type === 'true-false' && (
+                                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                        <h5 className="font-medium text-sm text-gray-900 mb-2">Correct Answer:</h5>
+                                        <p className="text-sm font-medium text-gray-700 bg-white p-2 rounded border border-gray-200">
+                                            {formData.trueFalseAnswer == 1 ? 'True' : formData.trueFalseAnswer == 0 ? 'False' : 'Not set'}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>

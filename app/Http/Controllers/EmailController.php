@@ -166,17 +166,8 @@ class EmailController extends Controller
 
             $otp = rand(100000, 999999);
             
-            // Check if login_logs table exists before trying to use it
-            if (DB::getSchemaBuilder()->hasTable('login_logs')) {
-                $login_log = LoginLogs::where("email", $request->email)->first();
-
-                if (!$login_log) {
-                    LoginLogs::create([
-                        "user_id" => $user->id,
-                        "email" => $request->email,
-                    ]);
-                }
-            }
+            // DO NOT create login log here - it should only be created after successful OTP verification
+            // The login log will be created in verifyOtp() method after the user successfully verifies the OTP
 
             LoginOtp::create([
                 "otp" => $otp,

@@ -216,7 +216,8 @@ class LobbyController extends Controller
         // Broadcast the current question
         broadcast(new QuizEvent('options-revealed', $current_question, $lobby->question_num, $id, $lobby->current_level));
 
-        return response()->json(['success' => true, 'message' => 'Options revealed'], 200);
+        // Return 1 to match frontend expectation (legacy compatibility)
+        return response()->json(1, 200);
     }
     public function revealAnswer($id, $subject_id)
     {

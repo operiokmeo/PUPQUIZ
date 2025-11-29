@@ -10,6 +10,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Swal from 'sweetalert2';
 import { Calendar } from '@/Components/ui/calendar';
 import { Clock } from 'lucide-react';
+import { formatManilaDate, parseManilaDate, getManilaTimeNow } from '@/lib/utils';
 
 // Countdown Timer Component
 const CountdownTimer = ({ startDate }: { startDate: string | Date }) => {
@@ -25,9 +26,12 @@ const CountdownTimer = ({ startDate }: { startDate: string | Date }) => {
         if (!startDate) return;
 
         const updateCountdown = () => {
-            const now = new Date().getTime();
-            // Parse the date - handle both string and Date object
-            const start = startDate instanceof Date ? startDate.getTime() : new Date(startDate).getTime();
+            // Use Manila time for accurate countdown
+            const now = getManilaTimeNow().getTime();
+            // Parse the date using Manila timezone parser
+            const start = parseManilaDate(startDate)?.getTime();
+            if (!start) return;
+            
             const difference = start - now;
 
             if (difference <= 0) {
@@ -55,9 +59,9 @@ const CountdownTimer = ({ startDate }: { startDate: string | Date }) => {
 
     if (expired || !startDate) return null;
 
-    const now = new Date().getTime();
-    const start = startDate instanceof Date ? startDate.getTime() : new Date(startDate).getTime();
-    if (start <= now) return null;
+    const now = getManilaTimeNow().getTime();
+    const start = parseManilaDate(startDate)?.getTime();
+    if (!start || start <= now) return null;
 
     return (
         <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-3 border border-orange-200">
@@ -556,28 +560,8 @@ const OrganizerLobby = (props: Props) => {
                                                             const displayDate = subjectWithStartDate?.start_date || al.start_date;
                                                             
                                                             if (displayDate) {
-                                                                // Parse the date string - backend sends in 'Y-m-d H:i:s' format
-                                                                // Treat it as local time (the time the user selected)
-                                                                const dateStr = displayDate;
-                                                                let date: Date;
-                                                                
-                                                                if (dateStr instanceof Date) {
-                                                                    date = dateStr;
-                                                                } else {
-                                                                    // Parse the date string - if it's in 'Y-m-d H:i:s' format, 
-                                                                    // JavaScript will parse it as local time
-                                                                    date = new Date(dateStr.replace(' ', 'T'));
-                                                                }
-                                                                
-                                                                // Format the date in a readable format
-                                                                return date.toLocaleDateString('en-US', {
-                                                                    year: 'numeric',
-                                                                    month: 'short',
-                                                                    day: 'numeric',
-                                                                    hour: '2-digit',
-                                                                    minute: '2-digit',
-                                                                    hour12: true
-                                                                });
+                                                                // Use utility function to parse and format date in Manila timezone
+                                                                return formatManilaDate(displayDate);
                                                             } else {
                                                                 return al.created_at ? (() => {
                                                                     const date = al.created_at instanceof Date ? al.created_at : new Date(al.created_at);
@@ -604,11 +588,10 @@ const OrganizerLobby = (props: Props) => {
                                                     const displayDate = subjectWithStartDate?.start_date || al.start_date;
                                                     
                                                     if (displayDate) {
-                                                        // Parse the date and check if it's in the future
-                                                        const dateStr = displayDate;
-                                                        const startDate = dateStr instanceof Date ? dateStr : new Date(dateStr.replace(' ', 'T'));
-                                                        const now = new Date();
-                                                        if (startDate.getTime() > now.getTime()) {
+                                                        // Parse the date in Manila timezone and check if it's in the future
+                                                        const startDate = parseManilaDate(displayDate);
+                                                        const now = getManilaTimeNow();
+                                                        if (startDate && startDate.getTime() > now.getTime()) {
                                                             return <CountdownTimer startDate={displayDate} />;
                                                         }
                                                     }

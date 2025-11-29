@@ -43,7 +43,10 @@ export default function CreateQuizPage() {
                 return quizData;
             }
         } catch (e) {
-            console.error('Error parsing AI quiz data:', e);
+            // Only log in development mode to avoid polluting session history
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Error parsing AI quiz data:', e);
+            }
         }
         return null;
     };
@@ -441,11 +444,15 @@ export default function CreateQuizPage() {
                 });
                 setQuizTitle('');
                 setQuestions([]);
-                // previewContent is a useMemo, not state, so no setter needed
+                // previewContent is a useMemo, not state, so no setter needed - it will update automatically
                 setShowPreview(false);
             },
             onError: (errors) => {
-                console.error('Error saving quiz:', errors);
+                // Don't log to console to avoid polluting session history
+                // Only log in development mode
+                if (process.env.NODE_ENV === 'development') {
+                    console.error('Error saving quiz:', errors);
+                }
                 
                 // Extract error messages for better user feedback
                 let errorMessage = 'Error saving quiz. Please check your inputs.';
@@ -475,26 +482,31 @@ export default function CreateQuizPage() {
     };
 
     const handleExit = (): void => {
-        // If modal is showing, close it and redirect to dashboard
-        if (showModal) {
+        try {
+            // Clear any quiz data
+            setQuizTitle('');
+            setQuestions([]);
+            setShowPreview(false);
+            
             // Redirect based on user role
             // Role 3 = Organizer → organizerLobby
             // Role 1 = Teacher → dashboard
+            // Role 2 = Student → dashboard
             if (user?.role === 3) {
                 router.get("/organizerLobby");
             } else if (user?.role === 1) {
                 router.get("/dashboard");
             } else {
-                // Default fallback
+                // Default fallback to dashboard
                 router.get("/dashboard");
             }
-        } else {
-            // If modal is not showing (user is editing quiz), redirect to dashboard
-            if (user?.role === 3) {
-                router.get("/organizerLobby");
-            } else {
-                router.get("/dashboard");
+        } catch (error) {
+            // Fallback error handling - ensure redirect still happens
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Error in handleExit:', error);
             }
+            // Force redirect even if there's an error
+            router.get("/dashboard");
         }
     };
 
