@@ -221,7 +221,8 @@ const Questionnaire = () => {
     try {
       const response = await axios.get(`/lobby-revealOptions/${id}/${subject_id}`)
 
-      if (response.data == 1) {
+      // Check for success (response can be 1 or {success: true})
+      if (response.data == 1 || response.data?.success === true) {
         soundManager.playSuccess();
         Swal.fire({
           toast: true,
@@ -235,14 +236,27 @@ const Questionnaire = () => {
           color: '#399918',
           iconColor: '#399918 ',
         });
+        
+        // Update state to reflect options revealed
+        setState("options-revealed");
       }
-    } catch (error) {
-      // Error handled (details not logged to prevent data exposure)
+    } catch (error: any) {
+      console.error('Error revealing options:', error);
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'error',
+        title: error.response?.status === 404 ? 'Route not found. Please refresh the page.' : 'Failed to reveal options',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        background: '#fff',
+        color: '#e3342f',
+        iconColor: '#e3342f',
+      });
     } finally {
       setLoading(false)
     }
-
-
   }
   const handleRevealAnswer = async () => {
     setLoading(true)
@@ -395,25 +409,65 @@ const Questionnaire = () => {
       message = 'Your answer has been submitted successfully.';
     }
     
+    // Show success alert with working OK button
+    // Use proper SweetAlert2 configuration to ensure button works
     Swal.fire({
       icon: 'success',
       title: 'Answer Submitted!',
       html: `
-        <div style="text-align: left;">
-          <div style="margin-bottom: 0.5rem;">${message}</div>
-          ${reviewMessage ? `<div style="font-size: 0.875rem; color: #6b7280;">${reviewMessage}</div>` : ''}
+        <div style="text-align: left; padding: 0.5rem 0;">
+          <div style="margin-bottom: 0.5rem; font-size: 1rem;">${message}</div>
+          ${reviewMessage ? `<div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">${reviewMessage}</div>` : ''}
         </div>
       `,
       confirmButtonColor: '#f97316',
       confirmButtonText: 'OK',
       allowOutsideClick: true,
       allowEscapeKey: true,
+      allowEnterKey: true,
       focusConfirm: true,
+      showCancelButton: false,
+      showDenyButton: false,
+      buttonsStyling: true,
+      reverseButtons: false,
+      showClass: {
+        popup: 'animate-fade-in-up'
+      },
+      hideClass: {
+        popup: 'animate-fade-out'
+      },
+      customClass: {
+        confirmButton: 'swal2-confirm-custom',
+        popup: 'swal2-popup-custom'
+      },
+      didOpen: () => {
+        // Ensure button is properly accessible after modal opens
+        setTimeout(() => {
+          const confirmButton = document.querySelector('.swal2-confirm') as HTMLButtonElement;
+          if (confirmButton) {
+            // Ensure button is clickable
+            confirmButton.style.pointerEvents = 'auto';
+            confirmButton.style.cursor = 'pointer';
+            confirmButton.removeAttribute('disabled');
+            confirmButton.setAttribute('aria-label', 'OK');
+          }
+        }, 50);
+      },
+      willClose: () => {
+        // Clean up when modal is about to close
+        return true;
+      },
       didClose: () => {
         // Ensure focus is returned properly when dialog closes
         if (document.activeElement && document.activeElement instanceof HTMLElement) {
           document.activeElement.blur();
         }
+      }
+    }).then((result) => {
+      // Handle the result - this will be called when OK is clicked
+      if (result.isConfirmed || result.isDismissed) {
+        // Modal was closed successfully
+        return;
       }
     });
   }
@@ -644,20 +698,30 @@ const Questionnaire = () => {
     try {
       // Include current question_id in the request to filter answers for current question only
       const questionId = currentQuestion ? currentQuestion['id'] : null;
-      const url = questionId 
-        ? `/participant-shor-answer/${id}/${subject_id}?question_id=${questionId}`
-        : `/participant-shor-answer/${id}/${subject_id}`;
+      if (!questionId) {
+        console.warn('No question ID available for fetching participant answers');
+        return;
+      }
       
+      const url = `/participant-shor-answer/${id}/${subject_id}?question_id=${questionId}`;
       const response = await axios.get(url);
 
-      setParticapantShortAns(response.data);
+      // Ensure response data is an array
+      if (Array.isArray(response.data)) {
+        setParticapantShortAns(response.data);
+      } else {
+        console.warn('Invalid response format for participant answers:', response.data);
+        setParticapantShortAns([]);
+      }
 
       // No success message for auto-fetching - only show errors
 
-    } catch (error) {
+    } catch (error: any) {
       // Error handled (details not logged to prevent data exposure)
       // Only show error if it's a critical failure, not for silent polling
       console.error('Error fetching participant answers:', error);
+      // Don't show error to user during automatic polling - it's expected to fail sometimes
+      // Only log for debugging
     }
   }
 
@@ -704,14 +768,19 @@ const Questionnaire = () => {
       const response = await axios.post('/participant-answer-update', formData)
 
       if (response.data == 1) {
-        setParticapantShortAns([]);
+        // Don't clear answers - keep modal open to continue validating
+        // Only clear the saved answers array to allow new validations
         setSaveShortAnswer([]);
+        
+        // Refresh the participant answers to get updated status
+        getParticipantShortAnswer();
+        
         Swal.fire({
           toast: true,
           position: 'top-end',
           icon: 'success',
           title: "Answers validated successfully",
-          text: 'Participant responses were saved for reporting.',
+          text: 'Participant responses were saved. Modal will stay open for continued validation.',
           showConfirmButton: false,
           timer: 2500,
           timerProgressBar: true,
@@ -1252,7 +1321,8 @@ const Questionnaire = () => {
               <DialogTitle className="text-2xl font-bold text-orange-800 mb-4">
                 Participant Answers
               </DialogTitle>
-              <DialogDescription className="mt-6">
+              {/* Use div instead of DialogDescription to avoid DOM nesting warning (div inside p) */}
+              <div className="mt-6">
                 <div className="flex items-center gap-x-3 mb-4 bg-white/80 p-4 rounded-xl border border-orange-100 shadow-sm">
                   <div className="text-orange-700 font-medium">Question:</div>
                   <div className="text-orange-900 uppercase">{currentQuestion ? currentQuestion['question'] : ""} ?</div>
@@ -1271,7 +1341,7 @@ const Questionnaire = () => {
                   </TableHeader>
                   <TableBody>
                     {particapantShortAns.map((rank, index) => (
-                      <TableRow key={rank.rank} className="hover:bg-orange-50/80 transition-all duration-300 rounded-xl overflow-hidden">
+                      <TableRow key={rank.id || rank.rank || index} className="hover:bg-orange-50/80 transition-all duration-300 rounded-xl overflow-hidden">
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-x-4">
                             <div className="text-xl font-bold py-2.5 px-5 bg-gradient-to-br from-white to-orange-50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-orange-100">
@@ -1281,10 +1351,10 @@ const Questionnaire = () => {
                         </TableCell>
                         <TableCell>
                           <div className="text-xl font-bold py-2.5 px-5 bg-gradient-to-br from-white to-orange-50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 text-orange-900 border border-orange-100">
-                            {rank.prev_answer}
+                            {rank.prev_answer || "No Answer"}
                           </div>
                         </TableCell>
-                        <TableCell className="text-right flex gap-x-3">
+                        <TableCell className="text-right flex gap-x-3 justify-end">
 
                           <ToggleGroup
                             type="single"
@@ -1320,7 +1390,7 @@ const Questionnaire = () => {
                 <Button className='w-full bg-orange-600 hover:bg-orange-600/50 mt-5' disabled={savedShortAnswer.length !== particapantShortAns.length || savingShortAns} onClick={() => handleSave()}>
                   <LoadingText loading={savingShortAns} text="Saving please wait..." normal_text='Saving Answers' />
                 </Button>
-              </DialogDescription>
+              </div>
             </DialogHeader>
           </DialogContent>
         </Dialog>
@@ -1337,7 +1407,8 @@ const Questionnaire = () => {
                 <DialogTitle className="text-2xl font-bold text-orange-800 mb-4">
                   Validating answer
                 </DialogTitle>
-                <DialogDescription className="mt-6 flex flex-col gap-3">
+                {/* Use div instead of DialogDescription to avoid DOM nesting warning (div inside p) */}
+                <div className="mt-6 flex flex-col gap-3">
                   <div className="flex items-center gap-x-3 bg-white/80 p-4 rounded-xl border border-orange-100 shadow-sm">
                     <div className="text-orange-700 font-medium">Question:</div>
                     <div className="text-orange-900 uppercase">{currentQuestion ? currentQuestion['question'] : ""} ?</div>
@@ -1363,7 +1434,7 @@ const Questionnaire = () => {
                   </div>
 
 
-                </DialogDescription>
+                </div>
               </DialogHeader>
             </DialogContent>
           </Dialog>
@@ -1479,6 +1550,7 @@ const Questionnaire = () => {
         {/* Answer Options */}
 
         {
+<<<<<<< HEAD
   (
     // Show options when conditions are met OR always for organizers
     (state == "options-revealed" ||
@@ -1492,6 +1564,15 @@ const Questionnaire = () => {
     (currentQuestion && (currentQuestion["type"] == "true-false" || currentQuestion["type"] == "short-answer"))
   ) ? (
     <div className="grid grid-cols-2 gap-6 mt-6 justify-center relative w-full">
+=======
+          // Show options for participants when conditions are met, OR always show for organizers
+          // Organizers should always see options regardless of state
+          // True/false and short-answer questions should ALWAYS show for participants (no state restriction)
+          (auth.user && currentQuestion && (currentQuestion["options"] || currentQuestion["type"] == "true-false" || currentQuestion["type"] == "short-answer")) || 
+           (!auth.user && currentQuestion && (currentQuestion["type"] == "true-false" || currentQuestion["type"] == "short-answer")) ||
+           (!auth.user && (state == "options-revealed" || state == "timer-started" || (state == "answer-revealed" && selectedOption != null) || (options_revealed == 1 && state != "answer-revealed" && selectedOption != null))) ?
+            <div className="grid grid-cols-2 gap-6 mt-6 justify-center relative w-full">
+>>>>>>> upstream/main
 
       {currentQuestion && (() => {
         // TRUE/FALSE
@@ -1512,6 +1593,7 @@ const Questionnaire = () => {
                   <div className="flex items-center justify-center flex-1 relative group">
                     <div className="absolute inset-0 bg-gradient-to-b from-yellow-400/30 to-orange-300/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
 
+<<<<<<< HEAD
                     <div className="relative flex items-center justify-center space-x-4 p-8 rounded-2xl bg-gradient-to-b from-orange-500 via-orange-600 to-orange-700 border-2 border-orange-400 shadow-[inset_0_2px_8px_rgba(0,0,0,0.3),0_8px_16px_rgba(0,0,0,0.6)] active:shadow-[inset_0_4px_12px_rgba(0,0,0,0.5),0_2px_4px_rgba(0,0,0,0.6)] active:translate-y-1 transition-all duration-150 cursor-pointer w-full">
                       <RadioGroupItem
                         disabled={isDisabled}
@@ -1522,6 +1604,195 @@ const Questionnaire = () => {
                       <Label htmlFor="option-one" className="text-5xl font-black text-white cursor-pointer drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] tracking-wider select-none">
                         TRUE
                       </Label>
+=======
+                          <div className='w-[3px] bg-gradient-to-b from-transparent via-orange-400 to-transparent self-stretch rounded-full shadow-[0_0_8px_rgba(251,146,60,0.5)]'></div>
+
+                          <div className="flex items-center justify-center flex-1 relative group">
+                            <div className="absolute inset-0 bg-gradient-to-b from-yellow-400/30 to-orange-300/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
+
+                            <div className="relative flex items-center justify-center space-x-4 p-8 rounded-2xl bg-gradient-to-b from-orange-500 via-orange-600 to-orange-700 border-2 border-orange-400 shadow-[inset_0_2px_8px_rgba(0,0,0,0.3),0_8px_16px_rgba(0,0,0,0.6)] active:shadow-[inset_0_4px_12px_rgba(0,0,0,0.5),0_2px_4px_rgba(0,0,0,0.6)] active:translate-y-1 transition-all duration-150 cursor-pointer w-full">
+                              <RadioGroupItem
+                                disabled={isDisabled}
+                                value="false"
+                                id="option-two"
+                                className="border-2 border-white text-white focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-orange-700 h-9 w-9 data-[state=checked]:bg-white data-[state=checked]:border-yellow-300 data-[state=checked]:shadow-[0_0_20px_rgba(255,255,255,0.8)] transition-all"
+                              />
+                              <Label
+                                htmlFor="option-two"
+                                className="text-5xl font-black text-white cursor-pointer drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] group-hover:drop-shadow-[0_4px_12px_rgba(255,255,255,0.3)] transition-all duration-300 tracking-wider select-none"
+                              >
+                                FALSE
+                              </Label>
+                            </div>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                    );
+                  } else {
+                    // Organizer view for true/false - show read-only
+                    return (
+                      <div className='w-full col-span-2 flex gap-8'>
+                        <div className={`flex-1 p-8 rounded-2xl border-2 ${
+                          currentQuestion["trueFalseAnswer"] == 1 || currentQuestion["true_false_answer"] == 1
+                            ? 'bg-gradient-to-b from-green-400 via-green-500 to-green-600 border-green-300'
+                            : 'bg-gradient-to-b from-gray-300 via-gray-400 to-gray-500 border-gray-200'
+                        }`}>
+                          <div className="text-5xl font-black text-white text-center">TRUE</div>
+                          {(currentQuestion["trueFalseAnswer"] == 1 || currentQuestion["true_false_answer"] == 1) && (
+                            <div className="text-center text-3xl text-white mt-2">✓</div>
+                          )}
+                        </div>
+                        <div className={`flex-1 p-8 rounded-2xl border-2 ${
+                          currentQuestion["trueFalseAnswer"] == 0 || currentQuestion["true_false_answer"] == 0
+                            ? 'bg-gradient-to-b from-green-400 via-green-500 to-green-600 border-green-300'
+                            : 'bg-gradient-to-b from-gray-300 via-gray-400 to-gray-500 border-gray-200'
+                        }`}>
+                          <div className="text-5xl font-black text-white text-center">FALSE</div>
+                          {(currentQuestion["trueFalseAnswer"] == 0 || currentQuestion["true_false_answer"] == 0) && (
+                            <div className="text-center text-3xl text-white mt-2">✓</div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }
+                }
+                
+                // Handle multiple-choice questions with options
+                // Check if options exist and is not empty string
+                if (currentQuestion["options"] && currentQuestion["options"].trim() !== "") {
+                try {
+                  // Parse options for both participants and organizers
+                  const options = JSON.parse(currentQuestion["options"]);
+                  
+                  // Ensure options is an array and has items
+                  if (!Array.isArray(options) || options.length === 0) {
+                    console.warn('Options is not a valid array or is empty');
+                    return null;
+                  }
+                  
+                  if (!auth.user) {
+                    // Participant view - interactive buttons
+                    return options.map((option: any, index: number) => {
+                      const isSelected = selectedOption?.text === option.text;
+                      const isDisabled = !(state == "timer-started" && seconds > 0);
+                      return (
+                        <Button
+                          disabled={isDisabled}
+                          key={index}
+                          onClick={() => submitAnswer(option)}
+                          className={`
+    relative group
+    ${isSelected
+                              ? 'bg-gradient-to-b from-green-400 via-green-500 to-green-600 border-green-300'
+                              : isDisabled
+                                ? 'bg-gradient-to-b from-orange-300 via-orange-400 to-orange-500 border-orange-200'
+                                : 'bg-gradient-to-b from-orange-400 via-orange-500 to-orange-600 hover:from-orange-300 hover:via-orange-400 hover:to-orange-500 border-orange-300'}
+    text-white rounded-2xl transition-all duration-150 text-center text-4xl capitalize font-black p-10
+    shadow-[inset_0_2px_6px_rgba(0,0,0,0.2),0_6px_16px_rgba(0,0,0,0.3)]
+    ${isDisabled
+                              ? 'cursor-not-allowed opacity-75'
+                              : 'hover:shadow-[inset_0_2px_6px_rgba(0,0,0,0.2),0_8px_20px_rgba(0,0,0,0.4)] active:shadow-[inset_0_4px_10px_rgba(0,0,0,0.3),0_2px_4px_rgba(0,0,0,0.3)] active:translate-y-1'}
+    w-full break-words whitespace-normal border-2
+    drop-shadow-[0_2px_6px_rgba(0,0,0,0.2)]
+    tracking-wide
+  `}
+                        >
+                          {/* Glow effect on hover */}
+                          {!isDisabled && !isSelected && (
+                            <div className="absolute inset-0 bg-gradient-to-b from-yellow-300/40 to-orange-200/30 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100 -z-10"></div>
+                          )}
+
+                          {/* Shine overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent rounded-2xl pointer-events-none"></div>
+
+                          <span className="relative z-10">{option.text}</span>
+                        </Button>
+
+                      );
+                    });
+                  }
+
+                  // Organizer view - display options as read-only
+                  return options.map((option: any, index: number) => {
+                    const isCorrect = option.isCorrect || option.is_correct;
+                    return (
+                      <div
+                        key={index}
+                        className={`
+                          relative group
+                          ${isCorrect
+                            ? 'bg-gradient-to-b from-green-400 via-green-500 to-green-600 border-green-300'
+                            : 'bg-gradient-to-b from-gray-300 via-gray-400 to-gray-500 border-gray-200'}
+                          text-white rounded-2xl text-center text-4xl capitalize font-black p-10
+                          shadow-[inset_0_2px_6px_rgba(0,0,0,0.2),0_6px_16px_rgba(0,0,0,0.3)]
+                          w-full break-words whitespace-normal border-2
+                          drop-shadow-[0_2px_6px_rgba(0,0,0,0.2)]
+                          tracking-wide
+                        `}
+                      >
+                        {/* Shine overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent rounded-2xl pointer-events-none"></div>
+                        
+                        <div className="relative z-10 flex items-center justify-center gap-3">
+                          <span>{option.text}</span>
+                          {isCorrect && (
+                            <span className="text-3xl">✓</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  });
+
+                } catch (error) {
+                  // Fallback: if options parsing fails, show error message for organizers
+                  console.error('Error parsing options:', error);
+                  if (auth.user) {
+                    // For organizers, show an error message instead of nothing
+                    return (
+                      <div className="col-span-2 p-8 bg-red-100 border-2 border-red-300 rounded-2xl text-center">
+                        <p className="text-red-700 text-xl font-semibold">
+                          Error loading answer options. Please check the question configuration.
+                        </p>
+                        <p className="text-red-600 text-sm mt-2">
+                          Options data: {currentQuestion["options"] ? "Present but invalid" : "Missing"}
+                        </p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }
+              })()}
+              
+              {/* Handle short-answer questions separately */}
+              {currentQuestion && currentQuestion["type"] == "short-answer" && !currentQuestion["options"] && (() => {
+                if (!auth.user) {
+                  return (
+                    <div className='w-full col-span-2 p-8 bg-gradient-to-b from-orange-600 via-orange-700 to-orange-800 backdrop-blur-md rounded-3xl shadow-2xl border-2 border-orange-800 flex gap-y-6 flex-col '>
+                      {/* Subtle shine effect */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent rounded-3xl pointer-events-none"></div>
+
+                      <div className="relative">
+                        <Input
+                          disabled={shortAnswerSubmitted || state == 'timer-started' ? false : true}
+                          value={selectedOption || ''}
+                          onChange={({ target }) => setSelectedOption(target.value)}
+                          placeholder='Enter your answer'
+                          className='w-full h-20 border-2 border-orange-400 bg-gradient-to-b from-orange-500 via-orange-600 to-orange-700 placeholder:text-orange-200 text-white text-2xl font-medium px-6 py-6 rounded-2xl shadow-[inset_0_2px_8px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.6)] focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-orange-700 focus:border-orange-300 transition-all duration-300'
+                        />
+                      </div>
+
+                      <div className="relative group">
+                        <div className="absolute inset-0 bg-gradient-to-b from-yellow-400/30 to-orange-300/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
+
+                        <Button
+                          onClick={() => { submitAnswer(selectedOption); setShortAnswerSubmitted(true) }}
+                          disabled={shortAnswerSubmitted || state == 'timer-started' ? false : true}
+                          className='relative w-full bg-gradient-to-b from-orange-500 via-orange-600 to-orange-700 hover:from-orange-400 hover:via-orange-500 hover:to-orange-600 text-white text-2xl font-black rounded-2xl px-8 py-6 shadow-[inset_0_2px_8px_rgba(0,0,0,0.3),0_8px_16px_rgba(0,0,0,0.6)] hover:shadow-[inset_0_2px_8px_rgba(0,0,0,0.3),0_12px_20px_rgba(0,0,0,0.8)] active:shadow-[inset_0_4px_12px_rgba(0,0,0,0.5),0_2px_4px_rgba(0,0,0,0.6)] active:translate-y-1 transition-all duration-150 border-2 border-orange-400 tracking-wide drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]'
+                        >
+                          SUBMIT ANSWER
+                        </Button>
+                      </div>
+>>>>>>> upstream/main
                     </div>
                   </div>
 
@@ -1801,14 +2072,35 @@ const Questionnaire = () => {
                 {leaderboard && leaderboard.length > 0 ? (
                   leaderboard.filter((rank, index, self) => 
                     index === self.findIndex((r) => r.id === rank.id)
-                  ).map((rank, index) => (
-                  <TableRow key={`${rank.id}-${rank.question_id || index}`} className={`${rank.id == team_id ? "bg-orange-500/50 rounded-md hover:bg-orange-500/50" : "hover:bg-orange-200/50"}  transition-colors duration-200`}>
+                  ).map((rank, index) => {
+                    const isCurrentTeam = rank.id == team_id;
+                    const isTopThree = index < 3;
+                    return (
+                  <TableRow 
+                    key={`${rank.id}-${rank.question_id || index}`} 
+                    className={`
+                      ${isCurrentTeam ? "bg-orange-500/50 rounded-md hover:bg-orange-500/50" : "hover:bg-orange-200/50"}  
+                      transition-all duration-500 ease-out
+                      animate-fade-in-up
+                      ${isTopThree ? 'shadow-lg' : ''}
+                    `}
+                    style={{
+                      animationDelay: `${index * 100}ms`,
+                      animationFillMode: 'both'
+                    }}
+                  >
                     <TableCell className="font-medium">
                       <div className='flex items-center gap-x-4'>
-                        <div className="text-xl font-bold py-2 px-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg shadow-md shadow-orange-200">
+                        <div className={`
+                          text-xl font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-300
+                          ${index === 0 ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 shadow-yellow-300 animate-pulse' : 
+                            index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-400 shadow-gray-300' :
+                            index === 2 ? 'bg-gradient-to-r from-amber-500 to-amber-600 shadow-amber-300' :
+                            'bg-gradient-to-r from-orange-500 to-orange-600 shadow-orange-200'}
+                        `}>
                           <span className='text-white'>{index + 1}</span>
                         </div>
-                        <div className="text-xl font-bold py-2 px-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+                        <div className="text-xl font-bold py-2 px-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105">
                           <span className="text-orange-900">{rank.team}</span>
                         </div>
                       </div>
@@ -1825,7 +2117,14 @@ const Questionnaire = () => {
 
                     <TableCell>
 
-                      <div className="text-xl font-bold py-2 px-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 text-orange-900">
+                      <div className={`
+                        text-xl font-bold py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 text-orange-900
+                        ${isTopThree && rank.prev_answer_correct == 1 ? 
+                          index === 0 ? 'bg-yellow-100 animate-bounce-slow' :
+                          index === 1 ? 'bg-gray-100' :
+                          'bg-amber-100' :
+                          'bg-white hover:scale-105'}
+                      `}>
                         {
                           rank.prev_answer_correct == 1 ?
                             state != "over-all-leaderboard" ? currentQuestion ? currentQuestion['points'] : "" : rank.score <= 0 ? 0 : rank.score :
@@ -1861,7 +2160,8 @@ const Questionnaire = () => {
                     }
 
                   </TableRow>
-                  ))
+                    );
+                  })
                 ) : (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center py-8">
@@ -1903,36 +2203,52 @@ const Questionnaire = () => {
 
 
       {
-        state == "answer-revealed" && !auth.user && currentQuestion['type'] != 'short-answer' ?
+        state == "answer-revealed" && !auth.user && currentQuestion && currentQuestion['type'] != 'short-answer' ?
           currentQuestion['type'] == 'true-false' ?
-            <div className={`${selectedOption == "true" && currentQuestion['trueFalseAnswer'] == "1"
-              || selectedOption == "false" && currentQuestion['trueFalseAnswer'] == "0"
-              ? 'bg-green-500' : 'bg-red-500'} text-center text-white flex items-center justify-center gap-x-3 p-2 rounded-md absolute bottom-0 w-full`}>
-
-
-              {selectedOption == "true" && currentQuestion['trueFalseAnswer'] == "1"
-                || selectedOption == "false" && currentQuestion['trueFalseAnswer'] == "0"
-                ? <CheckIcon /> : <X />}
-
-
-              <p>
-                {selectedOption == "true" && currentQuestion['trueFalseAnswer'] == "1"
-                  || selectedOption == "false" && currentQuestion['trueFalseAnswer'] == "0"
-                  ? 'Correct' : 'Incorrect'}
-
-              </p>
-
-            </div> :
-            <div className={`${selectedOption?.isCorrect == true ? 'bg-green-500' : 'bg-red-500'} text-center text-white flex items-center justify-center gap-x-3 p-2 rounded-md absolute bottom-0 w-full`}>
-
-              {selectedOption?.isCorrect == true ? <CheckIcon /> : <X />}
-
-
-              <p>
-                {selectedOption?.isCorrect == true ? 'Correct' : !selectedOption ? 'No Answer' : 'Incorrect'}
-
-              </p>
-
+            (() => {
+              // Check both naming conventions for true/false answer
+              const correctAnswer = currentQuestion['trueFalseAnswer'] ?? currentQuestion['true_false_answer'];
+              const isCorrect = (selectedOption == "true" && (correctAnswer == "1" || correctAnswer == 1)) ||
+                               (selectedOption == "false" && (correctAnswer == "0" || correctAnswer == 0));
+              
+              return (
+                <div className={`
+                  ${isCorrect ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gradient-to-r from-red-500 to-red-600'} 
+                  text-center text-white flex items-center justify-center gap-x-3 p-4 rounded-lg 
+                  fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 shadow-2xl
+                  animate-fade-in-up
+                  min-w-[300px]
+                `}>
+                  <div className="flex items-center gap-3">
+                    {isCorrect ? (
+                      <CheckIcon className="w-6 h-6 animate-bounce" />
+                    ) : (
+                      <X className="w-6 h-6 animate-pulse" />
+                    )}
+                    <p className="text-xl font-bold">
+                      {isCorrect ? 'Correct!' : 'Incorrect'}
+                    </p>
+                  </div>
+                </div>
+              );
+            })() :
+            <div className={`
+              ${selectedOption?.isCorrect == true ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gradient-to-r from-red-500 to-red-600'} 
+              text-center text-white flex items-center justify-center gap-x-3 p-4 rounded-lg 
+              fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 shadow-2xl
+              animate-fade-in-up
+              min-w-[300px]
+            `}>
+              <div className="flex items-center gap-3">
+                {selectedOption?.isCorrect == true ? (
+                  <CheckIcon className="w-6 h-6 animate-bounce" />
+                ) : (
+                  <X className="w-6 h-6 animate-pulse" />
+                )}
+                <p className="text-xl font-bold">
+                  {selectedOption?.isCorrect == true ? 'Correct!' : !selectedOption ? 'No Answer' : 'Incorrect'}
+                </p>
+              </div>
             </div> : ""
       }
 
@@ -1945,6 +2261,81 @@ const Questionnaire = () => {
 
 
     </div >
+    <style>{`
+      @keyframes fade-in-up {
+        0% {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      @keyframes fade-out {
+        0% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+      }
+      
+      @keyframes bounce-slow {
+        0%, 100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-5px);
+        }
+      }
+      
+      .animate-fade-in-up {
+        animation: fade-in-up 0.6s ease-out;
+      }
+      
+      .animate-fade-out {
+        animation: fade-out 0.3s ease-out;
+      }
+      
+      .animate-bounce-slow {
+        animation: bounce-slow 2s ease-in-out infinite;
+      }
+      
+      /* Ensure SweetAlert2 confirm button is clickable and properly styled */
+      .swal2-confirm-custom,
+      .swal2-confirm {
+        background-color: #f97316 !important;
+        border: none !important;
+        padding: 0.75rem 2rem !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        pointer-events: auto !important;
+        z-index: 9999 !important;
+      }
+      
+      .swal2-confirm-custom:hover,
+      .swal2-confirm:hover {
+        background-color: #ea580c !important;
+        transform: scale(1.05) !important;
+      }
+      
+      .swal2-confirm-custom:active,
+      .swal2-confirm:active {
+        transform: scale(0.95) !important;
+      }
+      
+      .swal2-confirm-custom:focus,
+      .swal2-confirm:focus {
+        outline: 2px solid #f97316 !important;
+        outline-offset: 2px !important;
+      }
+    `}</style>
   )
 }
 
