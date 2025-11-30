@@ -632,6 +632,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/quizzes/{quiz}/start', [QuizController::class, 'start'])->name('quizzes.start');
     Route::get('/quizzes/{quiz}/start', [QuizController::class, 'start'])->name('quiz.start');
     Route::get('/quizzes/{quiz}/starting', [QuizController::class, 'starting'])->name('quizzes.starting');
+
+    // AI Proxy Routes
+    Route::post('/ai-proxy/generate-quiz', [App\Http\Controllers\AiProxyController::class, 'generateQuiz'])->name('ai.generate-quiz');
+    Route::post('/ai-proxy/generate-quiz-from-text', [App\Http\Controllers\AiProxyController::class, 'generateQuizFromText'])->name('ai.generate-quiz-from-text');
+    Route::post('/ai-proxy/generate-custom-prompt-quiz', [App\Http\Controllers\AiProxyController::class, 'generateCustomPromptQuiz'])->name('ai.generate-custom-prompt-quiz');
 });
 Route::post('/question/edit', [QuizController::class, 'updateQuestion'])->name('question.edit');
 Route::delete('/question/delete', [QuizController::class, 'deleteQuestion'])->name('question.delete');

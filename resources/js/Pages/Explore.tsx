@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Upload, Sparkles, FileText, Loader2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 
-const AI_API_URL = import.meta.env.VITE_AI_SERVICE_URL ?? 'http://localhost:8800'; // Flask AI service URL
+const AI_API_URL = '/ai-proxy'; // Use Laravel proxy instead of direct connection
 
 type QuestionType = 'multiple-choice' | 'true-false' | 'short-answer';
 
