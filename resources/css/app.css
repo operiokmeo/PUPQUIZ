@@ -60,7 +60,6 @@
 
 html, body {
   @apply font-poppins;
-  overflow: hidden;
 }
 
 @layer base {
